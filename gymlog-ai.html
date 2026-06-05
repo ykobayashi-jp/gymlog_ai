@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GymLog AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f0f;
+  --bg2: #1a1a1a;
+  --bg3: #242424;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.15);
+  --text: #f0f0f0;
+  --text2: #888;
+  --text3: #555;
+  --gold: #c9a84c;
+  --gold2: #e8c97a;
+  --blue: #4a9eff;
+  --green: #4caf7d;
+  --amber: #e8922a;
+  --red: #e85555;
+  --radius: 10px;
+  --radius-lg: 16px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.6;
+}
+/* ── Layout ── */
+.app { max-width: 480px; margin: 0 auto; padding: 0 0 80px; }
+header {
+  padding: 24px 20px 0;
+  border-bottom: 0.5px solid var(--border);
+  margin-bottom: 0;
+}
+.header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+.logo { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; color: var(--gold); letter-spacing: -0.5px; }
+.logo span { color: var(--text2); font-size: 13px; display: block; font-family: 'Noto Sans JP', sans-serif; margin-top: 2px; }
+.api-key-wrap { display: flex; align-items: center; gap: 6px; }
+.api-key-wrap input {
+  background: var(--bg3);
+  border: 0.5px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 7px 10px;
+  font-size: 12px;
+  color: var(--text);
+  width: 180px;
+  font-family: 'DM Mono', monospace;
+}
+.api-key-wrap input::placeholder { color: var(--text3); }
+.api-key-wrap button {
+  background: var(--gold);
+  color: #000;
+  border: none;
+  border-radius: var(--radius);
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.key-status { font-size: 11px; margin-top: 6px; margin-bottom: 12px; }
+.key-status.ok { color: var(--green); }
+.key-status.ng { color: var(--red); }
+/* ── Tabs ── */
+.tabs { display: flex; border-bottom: 0.5px solid var(--border); }
+.tab {
+  flex: 1; padding: 12px 4px; text-align: center; font-size: 13px;
+  cursor: pointer; color: var(--text3); border: none; background: none;
+  border-bottom: 2px solid transparent; transition: all .15s;
+}
+.tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+/* ── Sections ── */
+.section { display: none; padding: 20px; }
+.section.active { display: block; }
+/* ── Upload ── */
+.upload-area {
+  border: 1px dashed var(--border2);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  text-align: center;
+  cursor: pointer;
+  background: var(--bg2);
+  transition: border-color .15s, background .15s;
+}
+.upload-area:hover { border-color: var(--gold); background: var(--bg3); }
+.upload-area .icon { font-size: 32px; margin-bottom: 8px; }
+.upload-area p { font-size: 13px; color: var(--text2); }
+.upload-area img { max-width: 100%; max-height: 180px; border-radius: var(--radius); margin-top: 12px; object-fit: contain; }
+.filetype-hint { font-size: 11px; color: var(--text3); margin-top: 6px; font-family: 'DM Mono', monospace; min-height: 16px; }
+/* ── Buttons ── */
+.btn-main {
+  width: 100%; padding: 13px; border-radius: var(--radius);
+  background: var(--gold); color: #000;
+  border: none; font-size: 14px; font-weight: 700;
+  cursor: pointer; margin-top: 12px;
+  transition: background .15s, transform .1s;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.btn-main:hover { background: var(--gold2); }
+.btn-main:active { transform: scale(0.98); }
+.btn-main:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+.btn-sm {
+  font-size: 12px; padding: 6px 12px;
+  border-radius: var(--radius); cursor: pointer;
+  background: var(--bg3); color: var(--text2);
+  border: 0.5px solid var(--border2);
+  transition: background .15s;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.btn-sm:hover { background: var(--border2); color: var(--text); }
+/* ── Cards ── */
+.card {
+  background: var(--bg2);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-top: 12px;
+}
+.card-title { font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 10px; }
+/* ── Loading / Error ── */
+.loading { text-align: center; padding: 24px; color: var(--text2); font-size: 13px; }
+.spin {
+  display: inline-block; width: 18px; height: 18px;
+  border: 2px solid var(--border2); border-top-color: var(--gold);
+  border-radius: 50%; animation: spin .8s linear infinite;
+  margin-right: 8px; vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.error-card { background: rgba(232,85,85,0.1); border: 0.5px solid var(--red); border-radius: var(--radius-lg); padding: 14px 16px; margin-top: 12px; }
+.error-msg { color: var(--red); font-size: 13px; }
+.error-detail { color: var(--text3); font-size: 11px; margin-top: 6px; font-family: 'DM Mono', monospace; word-break: break-all; }
+/* ── PFC ── */
+.pfc-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 10px; }
+.pfc-cell { background: var(--bg3); border-radius: var(--radius); padding: 12px; text-align: center; }
+.pfc-val { font-size: 22px; font-weight: 700; font-family: 'DM Mono', monospace; }
+.pfc-label { font-size: 11px; color: var(--text2); margin-top: 3px; }
+/* ── Caption ── */
+.caption-box {
+  background: var(--bg3); border-radius: var(--radius); padding: 12px;
+  font-size: 13px; line-height: 1.8; white-space: pre-wrap; color: var(--text);
+  border-left: 2px solid var(--gold);
+}
+.tags { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+.tag {
+  font-size: 11px; padding: 4px 10px; border-radius: 20px;
+  background: rgba(201,168,76,0.12); color: var(--gold);
+  border: 0.5px solid rgba(201,168,76,0.3);
+}
+/* ── Exercise list ── */
+.ex-item { padding: 8px 0; border-bottom: 0.5px solid var(--border); }
+.ex-item:last-child { border-bottom: none; }
+.ex-name { font-weight: 500; font-size: 14px; }
+.ex-sets { font-size: 12px; color: var(--text2); margin-top: 3px; font-family: 'DM Mono', monospace; }
+/* ── Progress bars ── */
+.prog-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.prog-label { font-size: 12px; color: var(--text2); width: 72px; font-family: 'DM Mono', monospace; }
+.prog-bg { flex: 1; background: var(--bg3); border-radius: 20px; height: 6px; }
+.prog-fill { height: 6px; border-radius: 20px; transition: width .5s; }
+.prog-pct { font-size: 11px; color: var(--text3); width: 32px; text-align: right; font-family: 'DM Mono', monospace; }
+/* ── Goal inputs ── */
+.goal-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.goal-row label { font-size: 13px; color: var(--text2); width: 80px; }
+.goal-row input {
+  width: 80px; padding: 6px 8px; font-size: 13px;
+  border-radius: var(--radius); border: 0.5px solid var(--border2);
+  background: var(--bg3); color: var(--text);
+  font-family: 'DM Mono', monospace;
+}
+/* ── Stats ── */
+.metric-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 14px; }
+.metric { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 14px; text-align: center; }
+.metric-val { font-size: 24px; font-weight: 700; color: var(--gold); font-family: 'DM Mono', monospace; }
+.metric-label { font-size: 11px; color: var(--text2); margin-top: 4px; }
+.history-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 0.5px solid var(--border); }
+.history-item:last-child { border-bottom: none; }
+.badge { font-size: 11px; padding: 3px 9px; border-radius: 20px; background: rgba(201,168,76,0.12); color: var(--gold); border: 0.5px solid rgba(201,168,76,0.3); }
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text3); font-size: 13px; line-height: 2; }
+/* ── Chart wrapper ── */
+.chart-wrap { position: relative; width: 100%; height: 180px; margin-top: 12px; }
+/* ── Toast ── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--gold); color: #000; font-weight: 700; font-size: 13px;
+  padding: 10px 20px; border-radius: 20px; transition: transform .3s;
+  pointer-events: none; z-index: 999;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="header-top">
+      <div class="logo">GymLog AI<span>写真 → 記録 → Instagram</span></div>
+      <div>
+        <div class="api-key-wrap">
+          <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off">
+          <button onclick="saveKey()">保存</button>
+        </div>
+        <div class="key-status" id="keyStatus"></div>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('training')" id="tab-training">📓 トレーニング</button>
+      <button class="tab" onclick="switchTab('meal')" id="tab-meal">🥗 食事</button>
+      <button class="tab" onclick="switchTab('stats')" id="tab-stats">📈 記録</button>
+    </div>
+  </header>
+
+  <!-- Training -->
+  <div class="section active" id="sec-training">
+    <p style="font-size:12px;color:var(--text2);margin-bottom:10px;">ゴールドジムのノートを撮影してアップロード</p>
+    <div class="upload-area" onclick="document.getElementById('file-training').click()">
+      <div class="icon">📷</div>
+      <p>タップして写真を選択<br><span style="font-size:11px;">JPEG / PNG / HEIC 対応</span></p>
+      <img id="preview-training" style="display:none;">
+    </div>
+    <input type="file" id="file-training" accept="image/*" style="display:none;" onchange="onFile(event,'training')">
+    <div class="filetype-hint" id="hint-training"></div>
+    <button class="btn-main" id="btn-training" disabled onclick="analyzeTraining()">🧠 AIで読み取る・保存する</button>
+    <div id="result-training"></div>
+  </div>
+
+  <!-- Meal -->
+  <div class="section" id="sec-meal">
+    <p style="font-size:12px;color:var(--text2);margin-bottom:10px;">食事の写真をアップロード</p>
+    <div class="upload-area" onclick="document.getElementById('file-meal').click()">
+      <div class="icon">📷</div>
+      <p>タップして写真を選択<br><span style="font-size:11px;">JPEG / PNG / HEIC 対応</span></p>
+      <img id="preview-meal" style="display:none;">
+    </div>
+    <input type="file" id="file-meal" accept="image/*" style="display:none;" onchange="onFile(event,'meal')">
+    <div class="filetype-hint" id="hint-meal"></div>
+    <button class="btn-main" id="btn-meal" disabled onclick="analyzeMeal()">🧠 PFCを計算・保存する</button>
+    <div id="result-meal"></div>
+
+    <div class="card" style="margin-top:20px;">
+      <div class="card-title">目標PFC（1日）</div>
+      <div class="goal-row"><label>タンパク質</label><input type="number" id="goal-p" placeholder="150" min="0"> g</div>
+      <div class="goal-row"><label>脂質</label><input type="number" id="goal-f" placeholder="60" min="0"> g</div>
+      <div class="goal-row"><label>炭水化物</label><input type="number" id="goal-c" placeholder="200" min="0"> g</div>
+      <button class="btn-sm" style="margin-top:6px;" onclick="saveGoals()">✓ 目標を保存</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="section" id="sec-stats">
+    <div id="stats-content"><div class="loading"><span class="spin"></span>データを読み込み中...</div></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ── State ──
+const imgData = { training:{b64:null,mime:null}, meal:{b64:null,mime:null} };
+let trainingHistory=[], mealHistory=[], goals={p:150,f:60,c:200};
+let chartInstances={};
+
+// ── Storage (localStorage) ──
+function lsGet(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }
+function lsSet(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
+
+function loadAll(){
+  trainingHistory = lsGet('gl-training') || [];
+  mealHistory     = lsGet('gl-meals')    || [];
+  goals           = lsGet('gl-goals')    || {p:150,f:60,c:200};
+  const key       = localStorage.getItem('gl-apikey') || '';
+  if(key){ document.getElementById('apiKeyInput').value=key; updateKeyStatus(key); }
+  document.getElementById('goal-p').value = goals.p;
+  document.getElementById('goal-f').value = goals.f;
+  document.getElementById('goal-c').value = goals.c;
+}
+
+function saveKey(){
+  const k = document.getElementById('apiKeyInput').value.trim();
+  if(!k){ showToast('APIキーを入力してください'); return; }
+  localStorage.setItem('gl-apikey', k);
+  updateKeyStatus(k);
+  showToast('APIキーを保存しました');
+}
+function updateKeyStatus(k){
+  const el = document.getElementById('keyStatus');
+  if(k.startsWith('sk-ant-')){ el.textContent='✓ APIキー設定済み'; el.className='key-status ok'; }
+  else{ el.textContent='⚠ 形式を確認してください (sk-ant-...)'; el.className='key-status ng'; }
+}
+function getKey(){ return localStorage.getItem('gl-apikey')||''; }
+
+function saveGoals(){
+  goals={p:parseInt(document.getElementById('goal-p').value)||150,f:parseInt(document.getElementById('goal-f').value)||60,c:parseInt(document.getElementById('goal-c').value)||200};
+  lsSet('gl-goals',goals);
+  showToast('目標を保存しました');
+}
+
+// ── File select ──
+function getMime(file){
+  if(file.type&&file.type.startsWith('image/')){
+    if(['image/heic','image/heif'].includes(file.type)) return 'image/jpeg';
+    return file.type;
+  }
+  const ext=file.name.split('.').pop().toLowerCase();
+  return {jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',gif:'image/gif',webp:'image/webp',heic:'image/jpeg',heif:'image/jpeg'}[ext]||'image/jpeg';
+}
+function onFile(event, type){
+  const file=event.target.files[0]; if(!file) return;
+  const mime=getMime(file);
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const b64=e.target.result.split(',')[1];
+    imgData[type]={b64,mime};
+    const prev=document.getElementById('preview-'+type);
+    prev.src=e.target.result; prev.style.display='block';
+    document.getElementById('btn-'+type).disabled=false;
+    document.getElementById('hint-'+type).textContent=`${file.name}  (${mime})`;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── Tab ──
+function switchTab(name){
+  ['training','meal','stats'].forEach(t=>{
+    document.getElementById('sec-'+t).classList.toggle('active',t===name);
+    document.getElementById('tab-'+t).classList.toggle('active',t===name);
+  });
+  if(name==='stats') renderStats();
+}
+
+// ── API ──
+async function callClaude(prompt,b64,mime){
+  const key=getKey();
+  if(!key) throw new Error('APIキーが未設定です。右上に入力して保存してください。');
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1000,
+      messages:[{role:'user',content:[
+        {type:'image',source:{type:'base64',media_type:mime,data:b64}},
+        {type:'text',text:prompt}
+      ]}]
+    })
+  });
+  if(!res.ok){
+    const err=await res.json().catch(()=>({}));
+    throw new Error(`API ${res.status}: ${err?.error?.message||res.statusText}`);
+  }
+  const data=await res.json();
+  if(data.error) throw new Error(data.error.message);
+  return data.content.map(b=>b.text||'').join('');
+}
+function parseJSON(raw){
+  const clean=raw.replace(/^```[\w]*\n?/,'').replace(/\n?```$/,'').trim();
+  const s=clean.indexOf('{'), e=clean.lastIndexOf('}')+1;
+  if(s<0) throw new Error('JSONが見つかりません: '+clean.slice(0,120));
+  return JSON.parse(clean.slice(s,e));
+}
+
+// ── Training ──
+async function analyzeTraining(){
+  const btn=document.getElementById('btn-training');
+  btn.disabled=true;
+  document.getElementById('result-training').innerHTML='<div class="loading"><span class="spin"></span>ノートを読み取り中...</div>';
+  try{
+    const {b64,mime}=imgData.training;
+    const prompt=`このトレーニングノートの写真を解析してください。手書きのトレーニング記録を読み取り、以下のJSON形式のみ返してください。前置き・マークダウン不要。
+{"date":"YYYY-MM-DD","exercises":[{"name":"種目名","sets":[{"weight":重量数値,"reps":rep数値}]}],"instagram_caption":"Instagram投稿用キャプション（日本語・ハッシュタグ付き・200文字以内）"}`;
+    const raw=await callClaude(prompt,b64,mime);
+    const data=parseJSON(raw);
+    if(!data.date||!/^\d{4}-\d{2}-\d{2}$/.test(data.date)) data.date=today();
+    trainingHistory.push({...data,savedAt:Date.now()});
+    lsSet('gl-training',trainingHistory);
+    renderTrainingResult(data,true);
+  }catch(e){ showError('result-training','読み取りエラー',e.message); }
+  btn.disabled=false;
+}
+function renderTrainingResult(data,saved){
+  const exHTML=(data.exercises||[]).map(e=>{
+    const sets=(e.sets||[]).map((s,i)=>`Set${i+1}: ${s.weight}kg×${s.reps}rep`).join('　');
+    return `<div class="ex-item"><div class="ex-name">${e.name}</div><div class="ex-sets">${sets}</div></div>`;
+  }).join('');
+  const caption=(data.instagram_caption||'').replace(/#[^\s#]+/g,'').trim();
+  const tags=(data.instagram_caption||'').match(/#[^\s#]+/g)||[];
+  document.getElementById('result-training').innerHTML=`
+    <div class="card">
+      <div class="card-title">${data.date||today()} の記録 ${saved?'<span style="font-size:11px;color:var(--green);margin-left:6px;">✓ 保存済み</span>':''}</div>
+      ${exHTML||'<p style="color:var(--text2);font-size:13px;">種目を検出できませんでした</p>'}
+    </div>
+    <div class="card">
+      <div class="card-title">Instagram キャプション</div>
+      <div class="caption-box">${caption}</div>
+      <div class="tags">${tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+      <button class="btn-sm" style="margin-top:12px;" onclick="copyText('${encodeURIComponent(data.instagram_caption||'')}')">📋 コピー</button>
+    </div>`;
+}
+
+// ── Meal ──
+async function analyzeMeal(){
+  const btn=document.getElementById('btn-meal');
+  btn.disabled=true;
+  document.getElementById('result-meal').innerHTML='<div class="loading"><span class="spin"></span>PFCを計算中...</div>';
+  try{
+    const {b64,mime}=imgData.meal;
+    const prompt=`この食事の写真のPFCを推定してください。以下のJSON形式のみ返してください。前置き・マークダウン不要。
+{"date":"YYYY-MM-DD","meal_name":"料理名","calories":数値,"protein":数値,"fat":数値,"carbs":数値,"instagram_caption":"Instagram投稿用キャプション（日本語・ハッシュタグ付き・150文字以内）"}`;
+    const raw=await callClaude(prompt,b64,mime);
+    const data=parseJSON(raw);
+    if(!data.date||!/^\d{4}-\d{2}-\d{2}$/.test(data.date)) data.date=today();
+    mealHistory.push({...data,savedAt:Date.now()});
+    lsSet('gl-meals',mealHistory);
+    renderMealResult(data,true);
+  }catch(e){ showError('result-meal','解析エラー',e.message); }
+  btn.disabled=false;
+}
+function renderMealResult(data,saved){
+  const d=data.date||today();
+  const todayMeals=mealHistory.filter(m=>m.date===d);
+  const tP=Math.round(todayMeals.reduce((s,m)=>s+(m.protein||0),0));
+  const tF=Math.round(todayMeals.reduce((s,m)=>s+(m.fat||0),0));
+  const tC=Math.round(todayMeals.reduce((s,m)=>s+(m.carbs||0),0));
+  const tCal=Math.round(todayMeals.reduce((s,m)=>s+(m.calories||0),0));
+  const bar=(val,goal,color)=>{
+    const pct=goal>0?Math.min(100,Math.round(val/goal*100)):0;
+    return `<div class="prog-row"><span class="prog-label">${val}/${goal}g</span><div class="prog-bg"><div class="prog-fill" style="width:${pct}%;background:${color};"></div></div><span class="prog-pct">${pct}%</span></div>`;
+  };
+  const caption=(data.instagram_caption||'').replace(/#[^\s#]+/g,'').trim();
+  const tags=(data.instagram_caption||'').match(/#[^\s#]+/g)||[];
+  document.getElementById('result-meal').innerHTML=`
+    <div class="card">
+      <div class="card-title">${data.meal_name||'食事'} ${saved?'<span style="font-size:11px;color:var(--green);margin-left:6px;">✓ 保存済み</span>':''}</div>
+      <p style="font-size:22px;font-weight:700;color:var(--gold);font-family:\'DM Mono\',monospace;">${Math.round(data.calories||0)} <span style="font-size:13px;color:var(--text2);">kcal</span></p>
+      <div class="pfc-grid">
+        <div class="pfc-cell"><div class="pfc-val" style="color:var(--blue);">${Math.round(data.protein||0)}g</div><div class="pfc-label">タンパク質</div></div>
+        <div class="pfc-cell"><div class="pfc-val" style="color:var(--amber);">${Math.round(data.fat||0)}g</div><div class="pfc-label">脂質</div></div>
+        <div class="pfc-cell"><div class="pfc-val" style="color:var(--green);">${Math.round(data.carbs||0)}g</div><div class="pfc-label">炭水化物</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">今日の合計 — ${tCal} kcal</div>
+      ${bar(tP,goals.p,'var(--blue)')}
+      ${bar(tF,goals.f,'var(--amber)')}
+      ${bar(tC,goals.c,'var(--green)')}
+    </div>
+    <div class="card">
+      <div class="card-title">Instagram キャプション</div>
+      <div class="caption-box">${caption}</div>
+      <div class="tags">${tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+      <button class="btn-sm" style="margin-top:12px;" onclick="copyText('${encodeURIComponent(data.instagram_caption||'')}')">📋 コピー</button>
+    </div>`;
+}
+
+// ── Stats ──
+function renderStats(){
+  const el=document.getElementById('stats-content');
+  if(trainingHistory.length===0&&mealHistory.length===0){
+    el.innerHTML=`<div class="empty-state">まだ記録がありません<br>トレーニングや食事を記録してみよう</div>`;
+    return;
+  }
+  const allEx={};
+  trainingHistory.forEach(s=>(s.exercises||[]).forEach(e=>{
+    if(!allEx[e.name]) allEx[e.name]=[];
+    allEx[e.name].push({date:s.date,maxW:Math.max(...(e.sets||[]).map(st=>st.weight||0))});
+  }));
+  const exNames=Object.keys(allEx);
+  const featEx=exNames[0]||null;
+  const allW=trainingHistory.flatMap(s=>(s.exercises||[]).flatMap(e=>(e.sets||[]).map(st=>st.weight||0)));
+  const maxW=allW.length?Math.max(...allW):0;
+  const avgCal=mealHistory.length?Math.round(mealHistory.reduce((s,m)=>s+(m.calories||0),0)/Math.max(1,new Set(mealHistory.map(m=>m.date)).size)):0;
+
+  const exSelect=exNames.length>1?`<select id="ex-select" onchange="updateWeightChart()" style="font-size:12px;padding:4px 8px;border-radius:6px;background:var(--bg3);color:var(--text);border:0.5px solid var(--border2);margin-left:8px;">${exNames.map(n=>`<option value="${n}">${n}</option>`).join('')}</select>`:'';
+
+  const recentSessions=[...trainingHistory].sort((a,b)=>b.savedAt-a.savedAt).slice(0,5);
+  const histHTML=recentSessions.map(s=>{
+    const exList=(s.exercises||[]).map(e=>e.name).join('・');
+    return `<div class="history-item"><div><div style="font-size:13px;font-weight:500;">${s.date||''}</div><div style="font-size:12px;color:var(--text2);">${exList||'種目なし'}</div></div><span class="badge">${(s.exercises||[]).length}種目</span></div>`;
+  }).join('');
+
+  el.innerHTML=`
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-val">${trainingHistory.length}</div><div class="metric-label">総セッション</div></div>
+      <div class="metric"><div class="metric-val">${maxW>0?maxW+'kg':'--'}</div><div class="metric-label">最高重量</div></div>
+      <div class="metric"><div class="metric-val">${avgCal>0?avgCal:'--'}</div><div class="metric-label">平均kcal/日</div></div>
+    </div>
+    ${featEx?`<div class="card"><div class="card-title" style="display:flex;align-items:center;">📈 最大重量の推移${exSelect}</div><div class="chart-wrap"><canvas id="chartW" role="img" aria-label="重量推移グラフ">重量データ</canvas></div></div>`:''}
+    ${mealHistory.length?`<div class="card"><div class="card-title">直近7日のPFC推移</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px;">
+        <span style="font-size:11px;color:var(--text2);display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:var(--blue);display:inline-block;"></span>タンパク質</span>
+        <span style="font-size:11px;color:var(--text2);display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:var(--amber);display:inline-block;"></span>脂質</span>
+        <span style="font-size:11px;color:var(--text2);display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:var(--green);display:inline-block;"></span>炭水化物</span>
+      </div>
+      <div class="chart-wrap"><canvas id="chartPFC" role="img" aria-label="PFC推移グラフ">PFCデータ</canvas></div></div>`:''}
+    ${recentSessions.length?`<div class="card"><div class="card-title">最近のセッション</div>${histHTML}</div>`:''}
+    <div style="text-align:center;margin-top:16px;">
+      <button class="btn-sm" onclick="if(confirm('全記録を削除しますか？')){localStorage.removeItem('gl-training');localStorage.removeItem('gl-meals');trainingHistory=[];mealHistory=[];renderStats();}">🗑 全データをリセット</button>
+    </div>`;
+
+  setTimeout(()=>{
+    window._allEx=allEx;
+    if(featEx&&document.getElementById('chartW')) buildWeightChart(featEx);
+    if(mealHistory.length&&document.getElementById('chartPFC')) buildPFCChart();
+  },80);
+}
+
+function buildWeightChart(exName){
+  if(chartInstances.w) chartInstances.w.destroy();
+  const data=(window._allEx[exName]||[]).sort((a,b)=>a.date.localeCompare(b.date));
+  chartInstances.w=new Chart(document.getElementById('chartW'),{
+    type:'line',
+    data:{labels:data.map(d=>d.date.slice(5)),datasets:[{label:'最大重量(kg)',data:data.map(d=>d.maxW),borderColor:'#c9a84c',backgroundColor:'rgba(201,168,76,0.08)',fill:true,tension:0.35,pointRadius:4,pointBackgroundColor:'#c9a84c',borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:false,ticks:{color:'#888',font:{size:11}},grid:{color:'rgba(255,255,255,0.05)'}},x:{ticks:{color:'#888',font:{size:11}},grid:{display:false}}}}
+  });
+}
+function updateWeightChart(){
+  const sel=document.getElementById('ex-select');
+  if(sel) buildWeightChart(sel.value);
+}
+function buildPFCChart(){
+  if(chartInstances.pfc) chartInstances.pfc.destroy();
+  const days=[]; for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(d.toISOString().slice(0,10));}
+  chartInstances.pfc=new Chart(document.getElementById('chartPFC'),{
+    type:'bar',
+    data:{labels:days.map(d=>d.slice(5)),datasets:[
+      {label:'タンパク質',data:days.map(d=>Math.round(mealHistory.filter(m=>m.date===d).reduce((s,m)=>s+(m.protein||0),0))),backgroundColor:'rgba(74,158,255,0.7)',stack:'p'},
+      {label:'脂質',data:days.map(d=>Math.round(mealHistory.filter(m=>m.date===d).reduce((s,m)=>s+(m.fat||0),0))),backgroundColor:'rgba(232,146,42,0.7)',stack:'p'},
+      {label:'炭水化物',data:days.map(d=>Math.round(mealHistory.filter(m=>m.date===d).reduce((s,m)=>s+(m.carbs||0),0))),backgroundColor:'rgba(76,175,125,0.7)',stack:'p'}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{stacked:true,ticks:{color:'#888',font:{size:11}},grid:{color:'rgba(255,255,255,0.05)'}},x:{stacked:true,ticks:{color:'#888',font:{size:11},autoSkip:false},grid:{display:false}}}}
+  });
+}
+
+// ── Helpers ──
+function today(){ return new Date().toISOString().slice(0,10); }
+function copyText(encoded){
+  navigator.clipboard.writeText(decodeURIComponent(encoded)).then(()=>showToast('コピーしました！')).catch(()=>{
+    const t=document.createElement('textarea');
+    t.value=decodeURIComponent(encoded); document.body.appendChild(t);
+    t.select(); document.execCommand('copy'); document.body.removeChild(t);
+    showToast('コピーしました！');
+  });
+}
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2000);
+}
+function showError(id,title,detail){
+  document.getElementById(id).innerHTML=`<div class="error-card"><div class="error-msg">⚠ ${title}</div><div class="error-detail">${detail}</div></div>`;
+}
+
+loadAll();
+</script>
+</body>
+</html>
