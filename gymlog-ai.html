@@ -221,6 +221,13 @@ header {
 }
 /* ── Tab labels ── */
 .tab-label { font-size: 10px; display: block; margin-top: 2px; color: inherit; }
+/* ── API key drawer ── */
+.api-drawer { overflow:hidden; max-height:0; transition:max-height .3s ease; }
+.api-drawer.open { max-height:80px; }
+.api-toggle { display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;padding:0; }
+.api-dot { width:8px;height:8px;border-radius:50%;background:var(--text3);flex-shrink:0; }
+.api-dot.ok { background:var(--green); }
+
 /* ── Card hover ── */
 .card { transition: border-color .2s; }
 .card:hover { border-color: rgba(255,255,255,0.12); }
@@ -237,14 +244,20 @@ header {
 <div class="app">
   <header>
     <div class="header-top">
-      <div class="logo">GymLog AI<span>写真 → 記録 → Instagram</span></div>
-      <div>
-        <div class="api-key-wrap">
-          <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off">
-          <button onclick="saveKey()">保存</button>
-        </div>
-        <div class="key-status" id="keyStatus"></div>
+      <div class="logo">GymLog AI</div>
+      <button class="api-toggle" onclick="toggleApiDrawer()" id="api-toggle-btn">
+        <div class="api-dot" id="api-dot"></div>
+        <span style="font-size:12px;color:var(--text2);">API Key</span>
+        <span id="api-chevron" style="font-size:12px;color:var(--text3);">▾</span>
+      </button>
+    </div>
+    <div class="api-drawer" id="api-drawer">
+      <div style="padding:8px 0 12px;display:flex;align-items:center;gap:8px;">
+        <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off"
+          style="flex:1;padding:8px 10px;font-size:13px;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius);color:var(--text);font-family:'DM Mono',monospace;">
+        <button onclick="saveKey()" style="padding:8px 14px;background:var(--gold);color:#000;border:none;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;">保存</button>
       </div>
+      <div class="key-status" id="keyStatus" style="margin-top:-8px;padding-bottom:8px;font-size:11px;"></div>
     </div>
     <div class="tabs">
       <button class="tab active" onclick="switchTab('training')" id="tab-training">📓<span class="tab-label">トレーニング</span></button>
@@ -426,17 +439,30 @@ function loadAll(){
   calcPFC();
 }
 
+function toggleApiDrawer(){
+  const drawer=document.getElementById('api-drawer');
+  const chevron=document.getElementById('api-chevron');
+  drawer.classList.toggle('open');
+  chevron.textContent=drawer.classList.contains('open')?'▴':'▾';
+}
 function saveKey(){
-  const k = document.getElementById('apiKeyInput').value.trim();
+  const k=document.getElementById('apiKeyInput').value.trim();
   if(!k){ showToast('APIキーを入力してください'); return; }
-  localStorage.setItem('gl-apikey', k);
+  localStorage.setItem('gl-apikey',k);
   updateKeyStatus(k);
   showToast('APIキーを保存しました');
+  setTimeout(()=>{ document.getElementById('api-drawer').classList.remove('open'); document.getElementById('api-chevron').textContent='▾'; },600);
 }
 function updateKeyStatus(k){
-  const el = document.getElementById('keyStatus');
-  if(k.startsWith('sk-ant-')){ el.textContent='✓ APIキー設定済み'; el.className='key-status ok'; }
-  else{ el.textContent='⚠ 形式を確認してください (sk-ant-...)'; el.className='key-status ng'; }
+  const dot=document.getElementById('api-dot');
+  const el=document.getElementById('keyStatus');
+  if(k&&k.startsWith('sk-ant-')){
+    dot.classList.add('ok');
+    el.textContent='✓ APIキー設定済み'; el.style.color='var(--green)';
+  } else {
+    dot.classList.remove('ok');
+    el.textContent='⚠ 形式を確認 (sk-ant-...)'; el.style.color='var(--red)';
+  }
 }
 function getKey(){ return localStorage.getItem('gl-apikey')||''; }
 
@@ -508,47 +534,63 @@ function applyPFC(){
 }
 
 // ── File select ──
-function getMime(file){
-  if(file.type&&file.type.startsWith('image/')){
-    if(['image/heic','image/heif'].includes(file.type)) return 'image/jpeg';
-    return file.type;
-  }
-  const ext=(file.name||'').split('.').pop().toLowerCase();
-  return {jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',gif:'image/gif',webp:'image/webp',heic:'image/jpeg',heif:'image/jpeg'}[ext]||'image/jpeg';
-}
-
-function convertToJpeg(dataUrl, quality=0.85){
-  return new Promise(resolve=>{
-    const img=new Image();
-    img.onload=()=>{
-      const canvas=document.createElement('canvas');
-      const MAX=1920;
-      let {width:w,height:h}=img;
-      if(w>MAX||h>MAX){ const r=Math.min(MAX/w,MAX/h); w=Math.round(w*r); h=Math.round(h*r); }
-      canvas.width=w; canvas.height=h;
-      canvas.getContext('2d').drawImage(img,0,0,w,h);
-      resolve(canvas.toDataURL('image/jpeg',quality));
-    };
-    img.onerror=()=>resolve(dataUrl);
-    img.src=dataUrl;
+function onFile(event, type){
+  const file=event.target.files[0]; if(!file) return;
+  showLoadingPreview(type);
+  compressToJpeg(file).then(({b64,url})=>{
+    imgData[type]={b64,mime:'image/jpeg'};
+    document.getElementById('preview-'+type).src=url;
+    document.getElementById('upload-wrap-'+type).style.display='none';
+    document.getElementById('preview-wrap-'+type).style.display='block';
+  }).catch(err=>{
+    showToast('画像の読み込みに失敗しました: '+err.message);
+    retake(type);
   });
 }
 
-function onFile(event, type){
-  const file=event.target.files[0]; if(!file) return;
-  const origMime=getMime(file);
-  const reader=new FileReader();
-  reader.onload=async e=>{
-    const raw=e.target.result;
-    const needsConvert=['image/heic','image/heif','image/webp'].includes(origMime)||origMime==='image/jpeg';
-    const dataUrl=needsConvert ? await convertToJpeg(raw) : raw;
-    const b64=dataUrl.split(',')[1];
-    imgData[type]={b64, mime:'image/jpeg'};
-    document.getElementById('preview-'+type).src=dataUrl;
-    document.getElementById('upload-wrap-'+type).style.display='none';
-    document.getElementById('preview-wrap-'+type).style.display='block';
-  };
-  reader.readAsDataURL(file);
+function showLoadingPreview(type){
+  document.getElementById('upload-wrap-'+type).style.display='none';
+  document.getElementById('preview-wrap-'+type).style.display='block';
+  document.getElementById('preview-'+type).src='';
+  document.getElementById('preview-'+type).alt='読み込み中...';
+}
+
+async function compressToJpeg(file, maxPx=1280, quality=0.82){
+  // まずcreateImageBitmapで試みる（HEIF/HEICにも対応）
+  let bitmap;
+  try{
+    bitmap=await createImageBitmap(file);
+  }catch(e){
+    // フォールバック: FileReaderで読んでImageで試みる
+    const dataUrl=await readAsDataUrl(file);
+    bitmap=await new Promise((res,rej)=>{
+      const img=new Image();
+      img.onload=()=>res(img);
+      img.onerror=()=>rej(new Error('画像を開けませんでした'));
+      img.src=dataUrl;
+    });
+  }
+
+  const ow=bitmap.width||bitmap.naturalWidth;
+  const oh=bitmap.height||bitmap.naturalHeight;
+  const scale=Math.min(1, maxPx/Math.max(ow,oh));
+  const w=Math.round(ow*scale);
+  const h=Math.round(oh*scale);
+
+  const canvas=document.createElement('canvas');
+  canvas.width=w; canvas.height=h;
+  canvas.getContext('2d').drawImage(bitmap,0,0,w,h);
+  const url=canvas.toDataURL('image/jpeg',quality);
+  return {b64:url.split(',')[1], url};
+}
+
+function readAsDataUrl(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=e=>res(e.target.result);
+    r.onerror=()=>rej(new Error('ファイル読み込み失敗'));
+    r.readAsDataURL(file);
+  });
 }
 function retake(type){
   imgData[type]={b64:null,mime:null};
