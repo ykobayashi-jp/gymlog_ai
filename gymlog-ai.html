@@ -43,32 +43,8 @@ header {
 }
 .header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
 .logo { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; color: var(--gold); letter-spacing: -0.5px; }
-.logo span { color: var(--text2); font-size: 13px; display: block; font-family: 'Noto Sans JP', sans-serif; margin-top: 2px; }
-.api-key-wrap { display: flex; align-items: center; gap: 6px; }
-.api-key-wrap input {
-  background: var(--bg3);
-  border: 0.5px solid var(--border2);
-  border-radius: var(--radius);
-  padding: 7px 10px;
-  font-size: 12px;
-  color: var(--text);
-  width: 180px;
-  font-family: 'DM Mono', monospace;
-}
-.api-key-wrap input::placeholder { color: var(--text3); }
-.api-key-wrap button {
-  background: var(--gold);
-  color: #000;
-  border: none;
-  border-radius: var(--radius);
-  padding: 7px 12px;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-}
-.key-status { font-size: 11px; margin-top: 6px; margin-bottom: 12px; }
-.key-status.ok { color: var(--green); }
-.key-status.ng { color: var(--red); }
+.logo span { color: var(--text2); font-size: 13px; display: inline; font-family: 'Noto Sans JP', sans-serif; }
+/* 不要なapi-key-wrapスタイルを削除済み */
 /* ── Tabs ── */
 .tabs { display: flex; border-bottom: 0.5px solid var(--border); }
 .tab {
@@ -638,7 +614,7 @@ async function callClaude(prompt,b64,mime){
         'anthropic-dangerous-direct-browser-access':'true'
       },
       body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
+        model:'claude-sonnet-4-6',
         max_tokens:1000,
         messages:[{role:'user',content:[
           {type:'image',source:{type:'base64',media_type:mime,data:b64}},
@@ -677,8 +653,8 @@ function parseJSON(raw){
 
 // ── Training ──
 async function analyzeTraining(){
-  const btn=document.getElementById('btn-training');
-  btn.disabled=true;
+  const btn=document.getElementById('btn-training2')||document.getElementById('btn-training');
+  if(btn) btn.disabled=true;
   document.getElementById('result-training').innerHTML='<div class="loading"><span class="spin"></span>ノートを読み取り中...</div>';
   try{
     const {b64,mime}=imgData.training;
@@ -692,7 +668,7 @@ async function analyzeTraining(){
     renderTrainingResult(data,true);
     resetAfterAnalysis('training');
   }catch(e){ showError('result-training','読み取りエラー',e.message); }
-  btn.disabled=false;
+  if(btn) btn.disabled=false;
 }
 function renderTrainingResult(data,saved){
   const exHTML=(data.exercises||[]).map(e=>{
@@ -711,8 +687,8 @@ function renderTrainingResult(data,saved){
 
 // ── Meal ──
 async function analyzeMeal(){
-  const btn=document.getElementById('btn-meal');
-  btn.disabled=true;
+  const btn=document.getElementById('btn-meal2')||document.getElementById('btn-meal');
+  if(btn) btn.disabled=true;
   document.getElementById('result-meal').innerHTML='<div class="loading"><span class="spin"></span>PFCを計算中...</div>';
   try{
     const {b64,mime}=imgData.meal;
@@ -726,7 +702,7 @@ async function analyzeMeal(){
     renderMealResult(data,true);
     resetAfterAnalysis('meal');
   }catch(e){ showError('result-meal','解析エラー',e.message); }
-  btn.disabled=false;
+  if(btn) btn.disabled=false;
 }
 function renderMealResult(data, saved){
   const d=data.date||today();
@@ -843,7 +819,7 @@ async function recalcMeal(idx){
         'anthropic-version':'2023-06-01',
         'anthropic-dangerous-direct-browser-access':'true'
       },
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:300,
         messages:[{role:'user',content:`「${name}」のカロリー・PFCを推定してください。JSONのみ返してください。{"calories":数値,"protein":数値,"fat":数値,"carbs":数値}`}]})
     });
     const data=await res.json();
@@ -1084,7 +1060,6 @@ function renderStats(){
   const allW=trainingHistory.flatMap(s=>(s.exercises||[]).flatMap(e=>(e.sets||[]).map(st=>st.weight||0)));
   const maxW=allW.length?Math.max(...allW):0;
   const avgCal=mealHistory.length?Math.round(mealHistory.reduce((s,m)=>s+(m.calories||0),0)/Math.max(1,new Set(mealHistory.map(m=>m.date)).size)):0;
-  const latestWeight=weightLog.length?weightLog[weightLog.length-1].w:'--';
   const exSelect=exNames.length>1?`<select id="ex-select" onchange="updateWeightChart()" style="font-size:12px;padding:4px 8px;border-radius:6px;background:var(--bg3);color:var(--text);border:0.5px solid var(--border2);margin-left:8px;">${exNames.map(n=>`<option value="${n}">${n}</option>`).join('')}</select>`:'';
   const recentSessions=[...trainingHistory].sort((a,b)=>b.savedAt-a.savedAt).slice(0,5);
   const histHTML=recentSessions.map(s=>{
