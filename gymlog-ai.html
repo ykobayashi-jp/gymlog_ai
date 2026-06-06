@@ -624,25 +624,43 @@ function switchTab(name){
 // ── API ──
 async function callClaude(prompt,b64,mime){
   const key=getKey();
-  if(!key) throw new Error('APIキーが未設定です。右上に入力して保存してください。');
-  const res=await fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
-    body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',
-      max_tokens:1000,
-      messages:[{role:'user',content:[
-        {type:'image',source:{type:'base64',media_type:mime,data:b64}},
-        {type:'text',text:prompt}
-      ]}]
-    })
-  });
-  if(!res.ok){
-    const err=await res.json().catch(()=>({}));
-    throw new Error(`API ${res.status}: ${err?.error?.message||res.statusText}`);
+  if(!key) throw new Error('APIキーが未設定です。API Keyをタップして入力してください。');
+  if(!b64) throw new Error('画像データがありません。もう一度写真を選んでください。');
+
+  let res;
+  try{
+    res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:mime,data:b64}},
+          {type:'text',text:prompt}
+        ]}]
+      })
+    });
+  }catch(networkErr){
+    // fetch自体が失敗（ネットワーク切断・CORS・混在コンテンツなど）
+    const msg=networkErr.message||'';
+    if(msg.includes('Load failed')||msg.includes('Failed to fetch')||msg.includes('Network')){
+      throw new Error(`ネットワークエラー: APIへの接続に失敗しました。\n① iPhoneのWi-Fi/通信を確認\n② SafariのURLがhttps://で始まっているか確認\n③ 設定→Safari→「サイト越えトラッキングを防ぐ」を一時オフ\nエラー詳細: ${msg}`);
+    }
+    throw new Error(`接続エラー: ${msg}`);
   }
+
+  if(!res.ok){
+    let errMsg=res.statusText;
+    try{ const e=await res.json(); errMsg=e?.error?.message||errMsg; }catch(_){}
+    if(res.status===401) throw new Error('APIキーが無効です。正しいキーを再入力してください。');
+    if(res.status===429) throw new Error('APIのレート制限に達しました。少し待ってから再試行してください。');
+    if(res.status===413) throw new Error('画像サイズが大きすぎます。もう少し小さい画像を使ってください。');
+    throw new Error(`APIエラー ${res.status}: ${errMsg}`);
+  }
+
   const data=await res.json();
-  if(data.error) throw new Error(data.error.message);
+  if(data.error) throw new Error(`APIエラー: ${data.error.message}`);
   return data.content.map(b=>b.text||'').join('');
 }
 function parseJSON(raw){
