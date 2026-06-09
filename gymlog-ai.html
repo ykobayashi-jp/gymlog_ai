@@ -246,24 +246,82 @@ header {
 
   <!-- Training -->
   <div class="section active" id="sec-training">
-    <div id="upload-wrap-training">
-      <div class="upload-area" onclick="document.getElementById('file-training').click()">
-        <div class="icon">📷</div>
-        <p>ノートを撮影してアップロード<br><span style="font-size:11px;">JPEG / PNG / HEIC 対応</span></p>
-      </div>
-      <input type="file" id="file-training" accept="image/*" style="display:none;" onchange="onFile(event,'training')">
-      <button class="btn-main" id="btn-training" disabled onclick="analyzeTraining()">🧠 AIで読み取る・保存する</button>
+
+    <!-- モード切替 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+      <button id="mode-btn-manual" onclick="setTrainingMode('manual')"
+        style="padding:12px;border-radius:var(--radius-lg);border:2px solid var(--gold);background:rgba(201,168,76,0.1);color:var(--gold);font-size:13px;font-weight:700;cursor:pointer;">
+        ✏️ 手動入力
+      </button>
+      <button id="mode-btn-ocr" onclick="setTrainingMode('ocr')"
+        style="padding:12px;border-radius:var(--radius-lg);border:0.5px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:13px;cursor:pointer;">
+        📷 ノート撮影
+      </button>
     </div>
-    <div id="preview-wrap-training" style="display:none;margin-bottom:2px;">
-      <div style="position:relative;border-radius:var(--radius-lg);overflow:hidden;background:var(--bg2);">
-        <img id="preview-training" style="width:100%;max-height:220px;object-fit:cover;display:block;">
-        <div style="position:absolute;top:10px;right:10px;display:flex;gap:8px;">
-          <button onclick="retake('training')" style="background:rgba(0,0,0,0.7);color:#fff;border:none;border-radius:20px;padding:6px 14px;font-size:12px;cursor:pointer;backdrop-filter:blur(4px);">📷 撮り直す</button>
+
+    <!-- 手動入力モード -->
+    <div id="training-manual">
+      <!-- 日付 -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <span style="font-size:12px;color:var(--text2);">記録日</span>
+        <span id="training-date-display" style="font-size:13px;font-weight:500;color:var(--text);font-family:'DM Mono',monospace;cursor:pointer;" onclick="editTrainingDate()"></span>
+      </div>
+
+      <!-- 分割法タブ -->
+      <div style="display:flex;gap:6px;margin-bottom:14px;">
+        <button id="split-btn-muscle" onclick="setSplitMode('muscle')"
+          style="flex:1;padding:8px 4px;border-radius:var(--radius);border:2px solid var(--gold);background:rgba(201,168,76,0.1);color:var(--gold);font-size:12px;font-weight:700;cursor:pointer;">部位別</button>
+        <button id="split-btn-ppl" onclick="setSplitMode('ppl')"
+          style="flex:1;padding:8px 4px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:12px;cursor:pointer;">PPL</button>
+        <button id="split-btn-updown" onclick="setSplitMode('updown')"
+          style="flex:1;padding:8px 4px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:12px;cursor:pointer;">上/下半身</button>
+      </div>
+
+      <!-- 部位選択エリア（分割法によって変わる） -->
+      <div style="font-size:12px;color:var(--text2);margin-bottom:8px;" id="group-select-label">部位を選択</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;" id="muscle-group-btns"></div>
+
+      <!-- 種目選択 -->
+      <div id="exercise-picker" style="display:none;">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:8px;">種目を選択 <span style="color:var(--text3);">（複数選択可）</span></div>
+        <div id="exercise-list-btns" style="margin-bottom:10px;"></div>
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <input id="custom-exercise-input" placeholder="種目を直接入力..." style="flex:1;padding:8px 10px;font-size:13px;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius);color:var(--text);">
+          <button onclick="addCustomExercise()" style="padding:8px 14px;background:var(--bg3);color:var(--text2);border:0.5px solid var(--border2);border-radius:var(--radius);font-size:13px;cursor:pointer;">追加</button>
         </div>
       </div>
-      <button class="btn-main" id="btn-training2" onclick="analyzeTraining()" style="margin-top:10px;">🧠 AIで読み取る・保存する</button>
+
+      <!-- セット入力エリア -->
+      <div id="sets-area"></div>
+
+      <!-- 保存ボタン -->
+      <button id="save-training-btn" class="btn-main" style="display:none;" onclick="saveManualTraining()">💾 記録を保存する</button>
+
+      <!-- 今日の記録表示 -->
+      <div id="today-training-log"></div>
     </div>
-    <div id="result-training"></div>
+
+    <!-- OCRモード -->
+    <div id="training-ocr" style="display:none;">
+      <div id="upload-wrap-training">
+        <div class="upload-area" onclick="document.getElementById('file-training').click()">
+          <div class="icon">📷</div>
+          <p>ノートを撮影してアップロード<br><span style="font-size:11px;">JPEG / PNG / HEIC 対応</span></p>
+        </div>
+        <input type="file" id="file-training" accept="image/*" style="display:none;" onchange="onFile(event,'training')">
+        <button class="btn-main" id="btn-training" disabled onclick="analyzeTraining()">🧠 AIで読み取る・保存する</button>
+      </div>
+      <div id="preview-wrap-training" style="display:none;margin-bottom:2px;">
+        <div style="position:relative;border-radius:var(--radius-lg);overflow:hidden;background:var(--bg2);">
+          <img id="preview-training" style="width:100%;max-height:220px;object-fit:cover;display:block;">
+          <div style="position:absolute;top:10px;right:10px;">
+            <button onclick="retake('training')" style="background:rgba(0,0,0,0.7);color:#fff;border:none;border-radius:20px;padding:6px 14px;font-size:12px;cursor:pointer;backdrop-filter:blur(4px);">📷 撮り直す</button>
+          </div>
+        </div>
+        <button class="btn-main" id="btn-training2" onclick="analyzeTraining()" style="margin-top:10px;">🧠 AIで読み取る・保存する</button>
+      </div>
+      <div id="result-training"></div>
+    </div>
   </div>
 
   <!-- Meal -->
@@ -413,6 +471,7 @@ function loadAll(){
   setGoalMode(calcGoalMode, false);
   setActivity(calcActivity, false);
   calcPFC();
+  initTrainingManual();
 }
 
 function toggleApiDrawer(){
@@ -894,6 +953,357 @@ function renderInsta(){
     </div>`;
   }).join('');
 }
+
+// ── Training Manual Input ──
+const MUSCLE_GROUPS = {
+  '胸': {
+    'バーベル': ['バーベルベンチプレス','インクラインバーベルベンチ','デクラインバーベルベンチ'],
+    'ダンベル': ['ダンベルベンチプレス','インクラインダンベルベンチ','ダンベルフライ','インクラインダンベルフライ','ダンベルプルオーバー'],
+    'マシン': ['スミスマシンベンチプレス','チェストプレスマシン','ペックデック','バタフライマシン','ケーブルクロスオーバー','ケーブルフライ'],
+    '自重': ['ディップス','プッシュアップ','ワイドプッシュアップ'],
+  },
+  '背中': {
+    'バーベル': ['デッドリフト','バーベルロウ','Tバーロウ','スーモデッドリフト'],
+    'ダンベル': ['ダンベルロウ','ダンベルデッドリフト','ダンベルプルオーバー'],
+    'マシン': ['ラットプルダウン','シーテッドケーブルロウ','ケーブルロウ','マシンロウ','ロープフェイスプル','アシステッド懸垂'],
+    '自重': ['懸垂（ワイドグリップ）','懸垂（ナローグリップ）','チンアップ'],
+  },
+  '肩': {
+    'バーベル': ['バーベルショルダープレス','バーベルアップライトロウ'],
+    'ダンベル': ['ダンベルショルダープレス','サイドレイズ','フロントレイズ','ダンベルリアデルト','アーノルドプレス','インクラインサイドレイズ'],
+    'マシン': ['スミスマシンショルダープレス','ショルダープレスマシン','ケーブルサイドレイズ','ケーブルリアデルト','フェイスプル'],
+    '自重': ['パイクプッシュアップ','ハンドスタンドプッシュアップ'],
+  },
+  '腕': {
+    'バーベル': ['バーベルカール','EZバーカール','EZバースカルクラッシャー','クローズグリップベンチ'],
+    'ダンベル': ['ダンベルカール','ハンマーカール','インクラインカール','コンセントレーションカール','ダンベルトライセプスキックバック','ダンベルオーバーヘッドトライセプス'],
+    'マシン': ['ケーブルカール','ケーブルハンマーカール','プリーチャーカールマシン','トライセプスプレスダウン（ロープ）','トライセプスプレスダウン（バー）','ケーブルオーバーヘッドトライセプス'],
+    '自重': ['ディップス（トライセプス）','チンアップ（バイセプス）'],
+  },
+  '脚': {
+    'バーベル': ['バーベルスクワット','フロントスクワット','バーベルランジ','バーベルRDL','バーベルヒップスラスト'],
+    'ダンベル': ['ダンベルスクワット','ダンベルランジ','ダンベルRDL','ダンベルカーフレイズ','ダンベルヒップスラスト'],
+    'マシン': ['レッグプレス','レッグカール（ライイング）','レッグカール（シーテッド）','レッグエクステンション','ハックスクワット','カーフレイズマシン','スミスマシンスクワット','アダクション','アブダクション'],
+    '自重': ['ブルガリアンスクワット','シングルレッグスクワット','グルートブリッジ','ヒップスラスト（自重）','ボックスジャンプ'],
+  },
+  '腹': {
+    'マシン': ['アブドミナルクランチマシン','ケーブルクランチ','ケーブルウッドチョップ'],
+    'ダンベル': ['ダンベルサイドベンド','ダンベルクランチ'],
+    '自重': ['クランチ','シットアップ','レッグレイズ','ハンギングレッグレイズ','プランク','サイドプランク','ロシアンツイスト','アブローラー','バイシクルクランチ','ドラゴンフラッグ'],
+  },
+  '有酸素': {
+    'マシン': ['トレッドミル','エアロバイク','クロストレーナー','ローイングマシン','ステッパー','スキーエルゴ'],
+    '屋外': ['ランニング','ウォーキング','サイクリング','水泳','縄跳び'],
+    'HIIT': ['バーピー','マウンテンクライマー','ジャンピングジャック','スプリントインターバル'],
+  },
+};
+const MUSCLE_COLORS = {'胸':'#e85555','背中':'#4a9eff','肩':'#9b59b6','腕':'#e8922a','脚':'#4caf7d','腹':'#c9a84c','有酸素':'#1abc9c'};
+const SUB_COLORS = {'バーベル':'#c9a84c','ダンベル':'#4a9eff','マシン':'#4caf7d','自重':'#888','屋外':'#1abc9c','HIIT':'#e85555'};
+
+// PPL定義（複数部位をマージして1グループに）
+const PPL_GROUPS = {
+  'Push 💪': {
+    label:'Push（胸・肩・三頭）',
+    color:'#e85555',
+    parts:['胸','肩'],
+    extraSub:{'三頭筋':{
+      'バーベル':['クローズグリップベンチ','EZバースカルクラッシャー'],
+      'ダンベル':['ダンベルトライセプスキックバック','ダンベルオーバーヘッドトライセプス'],
+      'マシン':['トライセプスプレスダウン（ロープ）','トライセプスプレスダウン（バー）','ケーブルオーバーヘッドトライセプス'],
+      '自重':['ディップス（トライセプス）'],
+    }}
+  },
+  'Pull 🔄': {
+    label:'Pull（背中・二頭）',
+    color:'#4a9eff',
+    parts:['背中'],
+    extraSub:{'二頭筋':{
+      'バーベル':['バーベルカール','EZバーカール'],
+      'ダンベル':['ダンベルカール','ハンマーカール','インクラインカール','コンセントレーションカール'],
+      'マシン':['ケーブルカール','ケーブルハンマーカール','プリーチャーカールマシン'],
+      '自重':['チンアップ（バイセプス）'],
+    }}
+  },
+  'Legs 🦵': {
+    label:'Legs（脚・腹）',
+    color:'#4caf7d',
+    parts:['脚','腹'],
+    extraSub:{}
+  },
+};
+
+// 上半身/下半身定義
+const UPDOWN_GROUPS = {
+  '上半身 💪': {label:'上半身（胸・背中・肩・腕）',color:'#9b59b6',parts:['胸','背中','肩','腕'],extraSub:{}},
+  '下半身 🦵': {label:'下半身（脚・腹）',color:'#4caf7d',parts:['脚','腹'],extraSub:{}},
+};
+
+let currentSplitMode='muscle'; // 'muscle' | 'ppl' | 'updown'
+let currentSplitGroup=null; // PPL/上下半身選択時のグループキー
+
+function setSplitMode(mode){
+  currentSplitMode=mode;
+  currentMuscleGroup=null;
+  currentSplitGroup=null;
+  selectedExercises=[];
+  document.getElementById('exercise-picker').style.display='none';
+  renderSetsArea();
+  // タブスタイル更新
+  ['muscle','ppl','updown'].forEach(m=>{
+    const btn=document.getElementById('split-btn-'+m);
+    const active=m===mode;
+    btn.style.border=active?'2px solid var(--gold)':'0.5px solid var(--border2)';
+    btn.style.background=active?'rgba(201,168,76,0.1)':'var(--bg3)';
+    btn.style.color=active?'var(--gold)':'var(--text2)';
+    btn.style.fontWeight=active?'700':'400';
+  });
+  const label=document.getElementById('group-select-label');
+  if(mode==='muscle') label.textContent='部位を選択';
+  else if(mode==='ppl') label.textContent='今日のメニューを選択';
+  else label.textContent='今日のメニューを選択';
+  renderMuscleGroupBtns();
+}
+
+let currentMuscleGroup=null, selectedExercises=[], trainingInputDate=today();
+
+function initTrainingManual(){
+  document.getElementById('training-date-display').textContent=trainingInputDate.slice(5).replace('-','/');
+  renderMuscleGroupBtns();
+  renderSetsArea();
+  renderTodayTrainingLog();
+}
+function setTrainingMode(mode){
+  const isM=mode==='manual';
+  document.getElementById('training-manual').style.display=isM?'block':'none';
+  document.getElementById('training-ocr').style.display=isM?'none':'block';
+  const mb=document.getElementById('mode-btn-manual'), ob=document.getElementById('mode-btn-ocr');
+  mb.style.cssText+=`;border:${isM?'2px solid var(--gold)':'0.5px solid var(--border2)'};background:${isM?'rgba(201,168,76,0.1)':'var(--bg3)'};color:${isM?'var(--gold)':'var(--text2)'};font-weight:${isM?700:400}`;
+  ob.style.cssText+=`;border:${!isM?'2px solid var(--gold)':'0.5px solid var(--border2)'};background:${!isM?'rgba(201,168,76,0.1)':'var(--bg3)'};color:${!isM?'var(--gold)':'var(--text2)'};font-weight:${!isM?700:400}`;
+}
+function editTrainingDate(){
+  const d=prompt('記録日 (YYYY-MM-DD)',trainingInputDate);
+  if(d&&/^\d{4}-\d{2}-\d{2}$/.test(d)){
+    trainingInputDate=d;
+    document.getElementById('training-date-display').textContent=d.slice(5).replace('-','/');
+    renderTodayTrainingLog();
+  }
+}
+function renderMuscleGroupBtns(){
+  const el=document.getElementById('muscle-group-btns');
+  if(!el) return;
+  if(currentSplitMode==='muscle'){
+    el.innerHTML=Object.keys(MUSCLE_GROUPS).map(g=>{
+      const c=MUSCLE_COLORS[g]||'var(--gold)', active=g===currentMuscleGroup;
+      return `<button onclick="selectGroup('${g}')" style="padding:8px 14px;border-radius:20px;border:${active?`2px solid ${c}`:`1.5px solid var(--border2)`};background:${active?c+'22':'var(--bg3)'};color:${active?c:'var(--text2)'};font-size:13px;font-weight:${active?700:400};cursor:pointer;">${g}</button>`;
+    }).join('');
+  } else {
+    const groups=currentSplitMode==='ppl'?PPL_GROUPS:UPDOWN_GROUPS;
+    el.innerHTML=Object.entries(groups).map(([key,g])=>{
+      const active=key===currentSplitGroup;
+      return `<button onclick="selectGroup('${key}')" style="width:100%;padding:14px 16px;border-radius:var(--radius-lg);border:${active?`2px solid ${g.color}`:`1px solid var(--border2)`};background:${active?g.color+'22':'var(--bg3)'};cursor:pointer;display:block;margin-bottom:8px;text-align:left;">
+        <div style="font-size:16px;font-weight:700;color:${active?g.color:'var(--text)'};">${key}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:3px;">${g.label}</div>
+      </button>`;
+    }).join('');
+  }
+}
+function selectGroup(key){
+  if(currentSplitMode==='muscle'){
+    currentMuscleGroup=key; currentSplitGroup=null;
+  } else {
+    currentSplitGroup=key; currentMuscleGroup=null;
+  }
+  renderMuscleGroupBtns();
+  document.getElementById('exercise-picker').style.display='block';
+  renderExerciseListBtns();
+}
+function getMergedExercises(splitKey){
+  const groups=currentSplitMode==='ppl'?PPL_GROUPS:UPDOWN_GROUPS;
+  const g=groups[splitKey]; if(!g) return {};
+  const merged={};
+  g.parts.forEach(part=>{
+    const partGroup=MUSCLE_GROUPS[part]||{};
+    Object.entries(partGroup).forEach(([sub,exs])=>{ merged[part+' / '+sub]=exs; });
+  });
+  Object.entries(g.extraSub||{}).forEach(([part,subs])=>{
+    Object.entries(subs).forEach(([sub,exs])=>{ merged[part+' / '+sub]=exs; });
+  });
+  return merged;
+}
+function renderSubGroup(sub,exs){
+  const parts=sub.split(' / ');
+  const partName=parts[0],subName=parts[1]||parts[0];
+  const partColor=MUSCLE_COLORS[partName]||'var(--text2)';
+  const subColor=SUB_COLORS[subName]||'var(--text3)';
+  const btns=exs.map(ex=>{
+    const sel=selectedExercises.find(e=>e.name===ex);
+    const safe=ex.replace(/'/g,"\\'");
+    return '<button onclick="toggleExercise(\''+safe+'\',\''+subName+'\')" style="padding:6px 11px;border-radius:20px;border:'+(sel?'2px solid var(--gold)':'1px solid var(--border2)')+';background:'+(sel?'rgba(201,168,76,0.12)':'var(--bg2)')+';color:'+(sel?'var(--gold)':'var(--text2)')+';font-size:12px;font-weight:'+(sel?700:400)+';cursor:pointer;margin-bottom:4px;">'+ex+(sel?' ✓':'')+'</button>';
+  }).join('');
+  return '<div style="margin-bottom:12px;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;"><span style="font-size:10px;padding:2px 7px;border-radius:20px;background:'+partColor+'22;color:'+partColor+';border:0.5px solid '+partColor+';">'+partName+'</span><span style="font-size:11px;font-weight:700;color:'+subColor+';">'+subName+'</span></div><div style="display:flex;flex-wrap:wrap;gap:5px;">'+btns+'</div></div>';
+}
+function renderExerciseListBtns(){
+  const el=document.getElementById('exercise-list-btns');
+  if(!el) return;
+  if(currentSplitMode==='muscle'){
+    const g=MUSCLE_GROUPS[currentMuscleGroup]||{};
+    el.innerHTML=Object.entries(g).map(([sub,exs])=>renderSubGroup(currentMuscleGroup+' / '+sub,exs)).join('');
+  } else {
+    const merged=getMergedExercises(currentSplitGroup);
+    el.innerHTML=Object.entries(merged).map(([sub,exs])=>renderSubGroup(sub,exs)).join('');
+  }
+}
+function toggleExercise(name, sub){
+  const idx=selectedExercises.findIndex(e=>e.name===name);
+  if(idx>=0) selectedExercises.splice(idx,1);
+  else selectedExercises.push({name, sub:sub||'', sets:[{weight:'',reps:''}]});
+  renderExerciseListBtns();
+  renderSetsArea();
+}
+function addCustomExercise(){
+  const inp=document.getElementById('custom-exercise-input');
+  const name=inp.value.trim(); if(!name) return;
+  if(!selectedExercises.find(e=>e.name===name)) selectedExercises.push({name,sets:[{weight:'',reps:''}]});
+  inp.value=''; renderSetsArea(); renderExerciseListBtns();
+}
+function getPastMax(name){
+  let max=0;
+  trainingHistory.forEach(s=>(s.exercises||[]).forEach(e=>{
+    if(e.name===name)(e.sets||[]).forEach(st=>{if((st.weight||0)>max)max=st.weight;});
+  }));
+  return max>0?max:null;
+}
+function renderSetsArea(){
+  const el=document.getElementById('sets-area');
+  const sb=document.getElementById('save-training-btn');
+  if(!el) return;
+  if(!selectedExercises.length){el.innerHTML='';if(sb)sb.style.display='none';return;}
+  if(sb) sb.style.display='block';
+  el.innerHTML=selectedExercises.map((ex,ei)=>{
+    const pm=getPastMax(ex.name);
+    const pmHTML=pm?`<span style="font-size:11px;color:var(--text3);margin-left:6px;">過去最高 <span style="color:var(--gold);font-weight:700;">${pm}kg</span></span>`:'';
+    const color=MUSCLE_COLORS[currentMuscleGroup]||'var(--gold)';
+    const sHTML=ex.sets.map((s,si)=>`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div style="font-size:11px;color:var(--text3);width:36px;text-align:center;font-family:'DM Mono',monospace;flex-shrink:0;">Set${si+1}</div>
+        <div style="flex:1;position:relative;">
+          <input type="number" inputmode="decimal" placeholder="0" min="0" value="${s.weight}"
+            style="width:100%;padding:12px 28px 12px 10px;font-size:18px;font-weight:700;font-family:'DM Mono',monospace;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius);color:var(--text);text-align:center;"
+            oninput="if(this.value<0)this.value=0;updateSet(${ei},${si},'weight',this.value)">
+          <span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3);">kg</span>
+        </div>
+        <div style="font-size:18px;color:var(--text3);flex-shrink:0;">×</div>
+        <div style="flex:1;position:relative;">
+          <input type="number" inputmode="numeric" placeholder="0" min="0" value="${s.reps}"
+            style="width:100%;padding:12px 30px 12px 10px;font-size:18px;font-weight:700;font-family:'DM Mono',monospace;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius);color:var(--text);text-align:center;"
+            oninput="if(this.value<0)this.value=0;updateSet(${ei},${si},'reps',this.value)">
+          <span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3);">rep</span>
+        </div>
+        <button onclick="removeSet(${ei},${si})" style="width:32px;height:32px;border-radius:50%;background:rgba(232,85,85,0.15);color:var(--red);border:none;cursor:pointer;font-size:16px;flex-shrink:0;">×</button>
+      </div>`).join('');
+    const subBadge=ex.sub?`<span style="font-size:10px;padding:2px 7px;border-radius:20px;background:${(SUB_COLORS[ex.sub]||'#888')}22;color:${SUB_COLORS[ex.sub]||'#888'};border:0.5px solid ${SUB_COLORS[ex.sub]||'#888'};margin-left:6px;">${ex.sub}</span>`:'';
+    return `<div class="card" style="margin-bottom:12px;border-left:3px solid ${color};">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div><span style="font-size:15px;font-weight:700;color:var(--text);">${ex.name}</span>${subBadge}${pmHTML}</div>
+        <button onclick="removeExercise(${ei})" style="font-size:11px;padding:3px 8px;border-radius:20px;background:rgba(232,85,85,0.12);color:var(--red);border:0.5px solid rgba(232,85,85,0.3);cursor:pointer;">削除</button>
+      </div>
+      ${sHTML}
+      <button onclick="addSet(${ei})" style="width:100%;padding:9px;border-radius:var(--radius);border:1px dashed var(--border2);background:transparent;color:var(--text2);font-size:13px;cursor:pointer;margin-top:4px;">+ セットを追加</button>
+    </div>`;
+  }).join('');
+}
+function updateSet(ei,si,field,val){
+  if(selectedExercises[ei]&&selectedExercises[ei].sets[si]){
+    let v=parseFloat(val);
+    if(isNaN(v)||v<0) v=0;
+    selectedExercises[ei].sets[si][field]=v===0?0:v;
+    // DOMの値も0未満にならないよう修正
+    const inputs=document.querySelectorAll('#set-row-'+ei+'-'+si+' input');
+    // 直接DOMは触らずstateだけ更新でOK
+  }
+}
+function addSet(ei){ selectedExercises[ei].sets.push({weight:'',reps:''}); renderSetsArea(); }
+function removeSet(ei,si){
+  if(selectedExercises[ei].sets.length<=1){showToast('最低1セット必要です');return;}
+  selectedExercises[ei].sets.splice(si,1); renderSetsArea();
+}
+function removeExercise(ei){ selectedExercises.splice(ei,1); renderSetsArea(); renderExerciseListBtns(); }
+function saveManualTraining(){
+  const validEx=selectedExercises.filter(e=>e.sets.some(s=>s.weight&&s.reps));
+  if(!validEx.length){showToast('重量とrepを入力してください');return;}
+  const groupLabel=currentSplitMode==='muscle'?currentMuscleGroup:(currentSplitGroup||'');
+  const record={date:trainingInputDate,muscleGroup:groupLabel,
+    exercises:validEx.map(e=>({name:e.name,sets:e.sets.filter(s=>s.weight&&s.reps).map(s=>({weight:parseFloat(s.weight),reps:parseInt(s.reps)}))})),
+    instagram_caption:generateTrainingCaption(validEx,currentMuscleGroup),savedAt:Date.now()};
+  trainingHistory.push(record);
+  lsSet('gl-training',trainingHistory);
+  pushInstaCard({type:'training',data:record});
+  showToast('記録を保存しました！');
+  selectedExercises=[]; currentMuscleGroup=null;
+  renderMuscleGroupBtns();
+  document.getElementById('exercise-picker').style.display='none';
+  renderSetsArea(); renderTodayTrainingLog();
+}
+function generateTrainingCaption(exercises,group){
+  const lines=exercises.map(e=>{const best=e.sets.reduce((m,s)=>parseFloat(s.weight||0)>m?parseFloat(s.weight):m,0);return `${e.name} ${best}kg`;});
+  const tags=['#筋トレ','#トレーニング','#筋トレ記録','#GymLife','#ジム'];
+  if(group) tags.push(`#${group}トレ`);
+  return `【${group||''}トレ記録】\n${lines.join(' / ')}\n\n${tags.join(' ')}`;
+}
+function renderTodayTrainingLog(){
+  const el=document.getElementById('today-training-log');
+  if(!el) return;
+  const sessions=trainingHistory.filter(s=>s.date===trainingInputDate).sort((a,b)=>b.savedAt-a.savedAt);
+  if(!sessions.length){el.innerHTML='';return;}
+
+  // 全種目をフラットにまとめる
+  const allEx=[];
+  sessions.forEach((s,si)=>{
+    const realIdx=trainingHistory.findIndex(t=>t.savedAt===s.savedAt&&t.date===s.date);
+    (s.exercises||[]).forEach(e=>{
+      allEx.push({name:e.name,sets:e.sets,realIdx});
+    });
+  });
+
+  const totalSets=allEx.reduce((sum,e)=>sum+e.sets.length,0);
+  const totalVol=allEx.reduce((sum,e)=>sum+e.sets.reduce((s2,st)=>s2+(st.weight||0)*(st.reps||0),0),0);
+
+  // コンパクトな行形式
+  const rows=allEx.map(e=>{
+    const bestW=Math.max(...e.sets.map(s=>s.weight||0));
+    const setStr=e.sets.map((s,i)=>`${s.weight}×${s.reps}`).join(' / ');
+    return `<div style="display:flex;align-items:baseline;justify-content:space-between;padding:5px 0;border-bottom:0.5px solid var(--border);">
+      <span style="font-size:13px;font-weight:500;color:var(--text);">${e.name}</span>
+      <span style="font-size:12px;color:var(--text2);font-family:'DM Mono',monospace;text-align:right;">${setStr}</span>
+    </div>`;
+  }).join('');
+
+  // セッション削除ボタン（savedAtベース）
+  const delBtns=sessions.map((s,si)=>{
+    const realIdx=trainingHistory.findIndex(t=>t.savedAt===s.savedAt&&t.date===s.date);
+    return `<button onclick="deleteTrainingSession(${realIdx})" style="font-size:11px;padding:3px 8px;border-radius:20px;background:rgba(232,85,85,0.12);color:var(--red);border:0.5px solid rgba(232,85,85,0.3);cursor:pointer;margin-left:6px;">🗑 削除</button>`;
+  }).join('');
+
+  el.innerHTML=`<div style="margin-top:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div style="font-size:12px;color:var(--text2);">${trainingInputDate.slice(5).replace('-','/')} の記録</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;">${allEx.length}種目 ${totalSets}set</span>
+        ${delBtns}
+      </div>
+    </div>
+    <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:10px 14px;">
+      ${rows}
+    </div>
+  </div>`;
+}
+function deleteTrainingSession(idx){
+  if(idx<0||idx>=trainingHistory.length){showToast('削除対象が見つかりません');return;}
+  if(!confirm('この記録を削除しますか？'))return;
+  trainingHistory.splice(idx,1); lsSet('gl-training',trainingHistory);
+  showToast('削除しました'); renderTodayTrainingLog();
+}
+
 function buildDateSelects(dl){
   const now=new Date();
   const selY=dl?parseInt(dl.slice(0,4)):now.getFullYear();
