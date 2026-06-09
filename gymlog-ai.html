@@ -220,7 +220,7 @@ header {
 <div class="app">
   <header>
     <div class="header-top">
-      <div class="logo">GymLog AI <span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:400;letter-spacing:0;">v0.8 beta</span></div>
+      <div class="logo">GymLog AI <span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:400;letter-spacing:0;">v0.9 beta</span></div>
       <button class="api-toggle" onclick="toggleApiDrawer()" id="api-toggle-btn">
         <div class="api-dot" id="api-dot"></div>
         <span style="font-size:12px;color:var(--text2);">API Key</span>
@@ -1009,32 +1009,32 @@ function renderInsta(){
 const MUSCLE_GROUPS = {
   '胸': {
     'バーベル': ['バーベルベンチプレス','インクラインバーベルベンチ','デクラインバーベルベンチ'],
-    'ダンベル': ['ダンベルベンチプレス','インクラインダンベルベンチ','ダンベルフライ','インクラインダンベルフライ','ダンベルプルオーバー'],
     'マシン': ['スミスマシンベンチプレス','チェストプレスマシン','ペックデック','バタフライマシン','ケーブルクロスオーバー','ケーブルフライ'],
+    'ダンベル': ['ダンベルベンチプレス','インクラインダンベルベンチ','ダンベルフライ','インクラインダンベルフライ','ダンベルプルオーバー'],
     '自重': ['ディップス','プッシュアップ','ワイドプッシュアップ'],
   },
   '背中': {
     'バーベル': ['デッドリフト','バーベルロウ','Tバーロウ','スーモデッドリフト'],
-    'ダンベル': ['ダンベルロウ','ダンベルデッドリフト','ダンベルプルオーバー'],
     'マシン': ['ラットプルダウン','シーテッドケーブルロウ','ケーブルロウ','マシンロウ','ロープフェイスプル','アシステッド懸垂'],
+    'ダンベル': ['ダンベルロウ','ダンベルデッドリフト','ダンベルプルオーバー'],
     '自重': ['懸垂（ワイドグリップ）','懸垂（ナローグリップ）','チンアップ'],
   },
   '肩': {
     'バーベル': ['バーベルショルダープレス','バーベルアップライトロウ'],
-    'ダンベル': ['ダンベルショルダープレス','サイドレイズ','フロントレイズ','ダンベルリアデルト','アーノルドプレス','インクラインサイドレイズ'],
     'マシン': ['スミスマシンショルダープレス','ショルダープレスマシン','ケーブルサイドレイズ','ケーブルリアデルト','フェイスプル'],
+    'ダンベル': ['ダンベルショルダープレス','サイドレイズ','フロントレイズ','ダンベルリアデルト','アーノルドプレス','インクラインサイドレイズ'],
     '自重': ['パイクプッシュアップ','ハンドスタンドプッシュアップ'],
   },
   '腕': {
     'バーベル': ['バーベルカール','EZバーカール','EZバースカルクラッシャー','クローズグリップベンチ'],
-    'ダンベル': ['ダンベルカール','ハンマーカール','インクラインカール','コンセントレーションカール','ダンベルトライセプスキックバック','ダンベルオーバーヘッドトライセプス'],
     'マシン': ['ケーブルカール','ケーブルハンマーカール','プリーチャーカールマシン','トライセプスプレスダウン（ロープ）','トライセプスプレスダウン（バー）','ケーブルオーバーヘッドトライセプス'],
+    'ダンベル': ['ダンベルカール','ハンマーカール','インクラインカール','コンセントレーションカール','ダンベルトライセプスキックバック','ダンベルオーバーヘッドトライセプス'],
     '自重': ['ディップス（トライセプス）','チンアップ（バイセプス）'],
   },
   '脚': {
     'バーベル': ['バーベルスクワット','フロントスクワット','バーベルランジ','バーベルRDL','バーベルヒップスラスト'],
-    'ダンベル': ['ダンベルスクワット','ダンベルランジ','ダンベルRDL','ダンベルカーフレイズ','ダンベルヒップスラスト'],
     'マシン': ['レッグプレス','レッグカール（ライイング）','レッグカール（シーテッド）','レッグエクステンション','ハックスクワット','カーフレイズマシン','スミスマシンスクワット','アダクション','アブダクション'],
+    'ダンベル': ['ダンベルスクワット','ダンベルランジ','ダンベルRDL','ダンベルカーフレイズ','ダンベルヒップスラスト'],
     '自重': ['ブルガリアンスクワット','シングルレッグスクワット','グルートブリッジ','ヒップスラスト（自重）','ボックスジャンプ'],
   },
   '腹': {
@@ -1051,9 +1051,57 @@ const MUSCLE_GROUPS = {
 const MUSCLE_COLORS = {'胸':'#e85555','背中':'#4a9eff','肩':'#9b59b6','腕':'#e8922a','脚':'#4caf7d','腹':'#c9a84c','有酸素':'#1abc9c'};
 const SUB_COLORS = {'バーベル':'#c9a84c','ダンベル':'#4a9eff','マシン':'#4caf7d','自重':'#888','屋外':'#1abc9c','HIIT':'#e85555'};
 
+// ── 種目名3段階セレクト生成 ──
+function buildExerciseSelect(id, currentName){
+  // 現在の種目からデフォルト部位・サブを逆引き
+  let defaultPart='', defaultSub='';
+  Object.entries(MUSCLE_GROUPS).forEach(([part,subs])=>{
+    Object.entries(subs).forEach(([sub,exs])=>{
+      if(exs.includes(currentName)){ defaultPart=part; defaultSub=sub; }
+    });
+  });
+  const partOpts=Object.keys(MUSCLE_GROUPS).map(p=>`<option value="${p}" ${p===defaultPart?'selected':''}>${p}</option>`).join('');
+  const subOpts=defaultPart?Object.keys(MUSCLE_GROUPS[defaultPart]).map(s=>`<option value="${s}" ${s===defaultSub?'selected':''}>${s}</option>`).join(''):'';
+  const exOpts=defaultPart&&defaultSub?MUSCLE_GROUPS[defaultPart][defaultSub].map(ex=>`<option value="${ex}" ${ex===currentName?'selected':''}>${ex}</option>`).join(''):'';
+  const sel=(sid,opts,onch)=>`<select id="${sid}" onchange="${onch}" style="flex:1;padding:7px 6px;font-size:13px;background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius);color:var(--text);">${opts}</select>`;
+  return `<div style="display:flex;gap:5px;margin-bottom:8px;">
+    ${sel(id+'-part','<option value="">部位</option>'+partOpts,`updateExSub('${id}')`)}
+    ${sel(id+'-sub',subOpts?subOpts:'<option value="">種別</option>',`updateExList('${id}')`)}
+    ${sel(id,exOpts?exOpts:'<option value="">種目</option>','')}
+  </div>`;
+}
+function updateExSub(baseId){
+  const part=document.getElementById(baseId+'-part')?.value;
+  const subSel=document.getElementById(baseId+'-sub');
+  const exSel=document.getElementById(baseId);
+  if(!part||!subSel||!exSel) return;
+  const subs=Object.keys(MUSCLE_GROUPS[part]||{});
+  subSel.innerHTML=subs.map((s,i)=>`<option value="${s}" ${i===0?'selected':''}>${s}</option>`).join('');
+  updateExList(baseId);
+}
+function updateExList(baseId){
+  const part=document.getElementById(baseId+'-part')?.value;
+  const sub=document.getElementById(baseId+'-sub')?.value;
+  const exSel=document.getElementById(baseId);
+  if(!part||!sub||!exSel) return;
+  const exs=MUSCLE_GROUPS[part]?.[sub]||[];
+  exSel.innerHTML=exs.map((ex,i)=>`<option value="${ex}" ${i===0?'selected':''}>${ex}</option>`).join('');
+}
+
+// ── 同名種目マージ ──
+function mergeExercises(exercises){
+  const merged=[];
+  exercises.forEach(e=>{
+    const found=merged.find(m=>m.name===e.name);
+    if(found) found.sets=[...found.sets,...e.sets];
+    else merged.push({...e,sets:[...e.sets]});
+  });
+  return merged;
+}
+
 // PPL定義（複数部位をマージして1グループに）
 const PPL_GROUPS = {
-  'Push 💪': {
+  'Push': {
     label:'Push（胸・肩・三頭）',
     color:'#e85555',
     parts:['胸','肩'],
@@ -1064,7 +1112,7 @@ const PPL_GROUPS = {
       '自重':['ディップス（トライセプス）'],
     }}
   },
-  'Pull 🔄': {
+  'Pull': {
     label:'Pull（背中・二頭）',
     color:'#4a9eff',
     parts:['背中'],
@@ -1075,7 +1123,7 @@ const PPL_GROUPS = {
       '自重':['チンアップ（バイセプス）'],
     }}
   },
-  'Legs 🦵': {
+  'Legs': {
     label:'Legs（脚・腹）',
     color:'#4caf7d',
     parts:['脚','腹'],
@@ -1085,8 +1133,8 @@ const PPL_GROUPS = {
 
 // 上半身/下半身定義
 const UPDOWN_GROUPS = {
-  '上半身 💪': {label:'上半身（胸・背中・肩・腕）',color:'#9b59b6',parts:['胸','背中','肩','腕'],extraSub:{}},
-  '下半身 🦵': {label:'下半身（脚・腹）',color:'#4caf7d',parts:['脚','腹'],extraSub:{}},
+  '上半身': {label:'上半身（胸・背中・肩・腕）',color:'#9b59b6',parts:['胸','背中','肩','腕'],extraSub:{}},
+  '下半身': {label:'下半身（脚・腹）',color:'#4caf7d',parts:['脚','腹'],extraSub:{}},
 };
 
 let currentSplitMode='muscle'; // 'muscle' | 'ppl' | 'updown'
@@ -1378,27 +1426,135 @@ function applySessionEdit(realIdx,cardId){
   document.getElementById(cardId+'-edit').style.display='none';
   showToast('修正を適用しました');
 }
+// ── 共通: 修正UIの行HTML生成 ──
+function buildEditRows(flatEx, prefix){
+  return flatEx.map((e,fi)=>{
+    const sel=buildExerciseSelect(prefix+'-name-'+fi, e.name);
+    const setRows=(e.sets||[]).map((st,si)=>`
+      <div style="display:grid;grid-template-columns:28px 1fr 1fr;align-items:center;gap:5px;margin-bottom:5px;">
+        <span style="font-size:11px;color:var(--text3);text-align:center;flex-shrink:0;">S${si+1}</span>
+        <div style="position:relative;">
+          <input type="number" min="0" step="0.5" value="${st.weight}" id="${prefix}-w-${fi}-${si}"
+            style="width:100%;padding:8px 24px 8px 6px;font-size:15px;font-weight:700;font-family:'DM Mono',monospace;background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius);color:var(--text);text-align:center;"
+            oninput="if(this.value<0)this.value=0;">
+          <span style="position:absolute;right:5px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text3);pointer-events:none;">kg</span>
+        </div>
+        <div style="position:relative;">
+          <input type="number" min="0" step="1" value="${st.reps}" id="${prefix}-r-${fi}-${si}"
+            style="width:100%;padding:8px 28px 8px 6px;font-size:15px;font-weight:700;font-family:'DM Mono',monospace;background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius);color:var(--text);text-align:center;"
+            oninput="if(this.value<0)this.value=0;">
+          <span style="position:absolute;right:5px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text3);pointer-events:none;">rep</span>
+        </div>
+      </div>`).join('');
+    return `<div style="margin-bottom:12px;padding-bottom:10px;border-bottom:0.5px solid var(--border);">
+      ${sel}${setRows}
+    </div>`;
+  }).join('');
+}
+
+// ── 共通: セッション群から種目マージ ──
+function flattenMergeSessionDay(sessions){
+  const flat=[];
+  sessions.forEach(s=>{
+    const realIdx=trainingHistory.findIndex(t=>t.savedAt===s.savedAt&&t.date===s.date);
+    (s.exercises||[]).forEach((e,ei)=>flat.push({name:e.name,sets:[...e.sets],realIdx,ei}));
+  });
+  // 同名種目マージ
+  const merged=[];
+  flat.forEach(e=>{
+    const found=merged.find(m=>m.name===e.name);
+    if(found){ found.sets=[...found.sets,...e.sets]; }
+    else merged.push({...e,sets:[...e.sets]});
+  });
+  return merged;
+}
+
+// ── 共通: シンプル表示HTML ──
+function buildSessionRows(mergedEx){
+  return mergedEx.map(e=>{
+    const setStr=e.sets.map(s=>`${s.weight}×${s.reps}`).join(' / ');
+    return `<div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:0.5px solid var(--border);">
+      <span style="font-size:13px;font-weight:500;color:var(--text);flex-shrink:0;margin-right:8px;">${e.name}</span>
+      <span style="font-size:12px;color:var(--text2);font-family:'DM Mono',monospace;text-align:right;">${setStr}</span>
+    </div>`;
+  }).join('');
+}
+
 function renderTodayTrainingLog(){
   const el=document.getElementById('today-training-log');
   if(!el) return;
   const sessions=trainingHistory.filter(s=>s.date===trainingInputDate).sort((a,b)=>b.savedAt-a.savedAt);
   if(!sessions.length){el.innerHTML='';return;}
-  const cards=sessions.map((s,si)=>{
-    const realIdx=trainingHistory.findIndex(t=>t.savedAt===s.savedAt&&t.date===s.date);
-    return renderTrainingSessionCard(s,realIdx,'today-sess-'+realIdx);
-  }).join('');
+
+  const mergedEx=flattenMergeSessionDay(sessions);
+  const totalSets=mergedEx.reduce((sum,e)=>sum+e.sets.length,0);
+  const rows=buildSessionRows(mergedEx);
+  const editRows=buildEditRows(mergedEx,'td');
+  const realIdxArr=[...new Set(mergedEx.map(e=>e.realIdx))];
+
   el.innerHTML=`<div style="margin-top:16px;">
-    <div style="font-size:12px;color:var(--text2);margin-bottom:8px;">${trainingInputDate.slice(5).replace('-','/')} の記録</div>
-    ${cards}
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div style="font-size:12px;color:var(--text2);">${trainingInputDate.slice(5).replace('-','/')} の記録</div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;">${mergedEx.length}種目 ${totalSets}set</span>
+        <button onclick="toggleEditPanel('today-edit')" style="font-size:11px;padding:3px 8px;border-radius:20px;background:var(--bg3);color:var(--text2);border:0.5px solid var(--border2);cursor:pointer;">✏️</button>
+        <button onclick="deleteAllTrainingSessions([${realIdxArr.join(',')}],'today')" style="font-size:11px;padding:3px 8px;border-radius:20px;background:rgba(232,85,85,0.12);color:var(--red);border:0.5px solid rgba(232,85,85,0.3);cursor:pointer;">🗑</button>
+      </div>
+    </div>
+    <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:10px 14px;">${rows}</div>
+    <div id="today-edit" style="display:none;margin-top:8px;background:var(--bg3);border-radius:var(--radius);padding:12px;">
+      <div style="font-size:11px;color:var(--gold);margin-bottom:10px;">種目・重量・repを修正</div>
+      ${editRows}
+      <button onclick="applyEditPanel('td',${JSON.stringify(realIdxArr)},'today-edit','today')" style="width:100%;padding:9px;background:var(--gold);color:#000;border:none;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;">✓ 修正を適用</button>
+    </div>
   </div>`;
 }
-function deleteTrainingSession(idx,cardId){
+
+function toggleEditPanel(id){
+  const el=document.getElementById(id);
+  if(el) el.style.display=el.style.display==='none'?'block':'none';
+}
+
+function applyEditPanel(prefix,realIdxArr,editId,target){
+  // editRowsのフラットインデックスで順番に取得してrealIdxArrのセッションに書き戻す
+  let fi=0;
+  realIdxArr.forEach(realIdx=>{
+    const s=trainingHistory[realIdx]; if(!s) return;
+    s.exercises=s.exercises.map((e,ei)=>{
+      const nameEl=document.getElementById(prefix+'-name-'+fi);
+      const name=nameEl?(nameEl.tagName==='SELECT'?nameEl.value:nameEl.value)||e.name:e.name;
+      const sets=e.sets.map((st,si)=>({
+        weight:parseFloat(document.getElementById(prefix+'-w-'+fi+'-'+si)?.value)||0,
+        reps:parseInt(document.getElementById(prefix+'-r-'+fi+'-'+si)?.value)||0
+      })).filter(s=>s.weight>0&&s.reps>0);
+      fi++;
+      return {name,sets};
+    });
+  });
+  lsSet('gl-training',trainingHistory);
+  toggleEditPanel(editId);
+  showToast('修正を適用しました');
+  if(target==='today') renderTodayTrainingLog();
+  else renderStats();
+}
+
+function deleteAllTrainingSessions(idxArr,target){
+  if(!confirm('この日の記録を全て削除しますか？'))return;
+  // 大きい順に削除してインデックスずれを防ぐ
+  [...idxArr].sort((a,b)=>b-a).forEach(idx=>{
+    if(idx>=0&&idx<trainingHistory.length) trainingHistory.splice(idx,1);
+  });
+  lsSet('gl-training',trainingHistory);
+  showToast('削除しました');
+  if(target==='today') renderTodayTrainingLog();
+  else renderStats();
+}
+
+function deleteTrainingSession(idx){
   if(idx<0||idx>=trainingHistory.length){showToast('削除対象が見つかりません');return;}
   if(!confirm('この記録を削除しますか？'))return;
   trainingHistory.splice(idx,1); lsSet('gl-training',trainingHistory);
-  showToast('削除しました');
-  if(cardId){const el=document.getElementById(cardId);if(el)el.remove();}
-  renderTodayTrainingLog();
+  showToast('削除しました'); renderTodayTrainingLog();
 }
 
 function buildDateSelects(dl){
@@ -1583,20 +1739,26 @@ function renderStats(){
   const recentDates=[...dateMap.keys()].slice(0,8);
   const histHTML=recentDates.map((date,di)=>{
     const daySessions=dateMap.get(date);
-    const cards=daySessions.map(s=>{
-      const realIdx=trainingHistory.findIndex(t=>t.savedAt===s.savedAt&&t.date===s.date);
-      return renderTrainingSessionCard(s,realIdx,'hist-sess-'+realIdx);
-    }).join('');
-    const totalEx=daySessions.reduce((sum,s)=>sum+(s.exercises||[]).length,0);
-    return `<div style="border-bottom:0.5px solid var(--border);">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;cursor:pointer;" onclick="toggleSessionDetail('hist-day-${di}','hist-chev-${di}')">
-        <span style="font-size:13px;font-weight:500;font-family:'DM Mono',monospace;">${date}</span>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:11px;color:var(--text3);">${totalEx}種目</span>
-          <span style="font-size:12px;color:var(--text3);" id="hist-chev-${di}">▾</span>
+    const mergedEx=flattenMergeSessionDay(daySessions);
+    const totalSets=mergedEx.reduce((sum,e)=>sum+e.sets.length,0);
+    const rows=buildSessionRows(mergedEx);
+    const editRows=buildEditRows(mergedEx,'hs'+di);
+    const realIdxArr=[...new Set(mergedEx.map(e=>e.realIdx))];
+    return `<div style="margin-bottom:10px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="font-size:12px;color:var(--text2);">${date.slice(5).replace('-','/')} の記録</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;">${mergedEx.length}種目 ${totalSets}set</span>
+          <button onclick="toggleEditPanel('hist-edit-${di}')" style="font-size:11px;padding:3px 8px;border-radius:20px;background:var(--bg3);color:var(--text2);border:0.5px solid var(--border2);cursor:pointer;">✏️</button>
+          <button onclick="deleteAllTrainingSessions([${realIdxArr.join(',')}],'stats')" style="font-size:11px;padding:3px 8px;border-radius:20px;background:rgba(232,85,85,0.12);color:var(--red);border:0.5px solid rgba(232,85,85,0.3);cursor:pointer;">🗑</button>
         </div>
       </div>
-      <div id="hist-day-${di}" style="display:none;padding-bottom:8px;">${cards}</div>
+      <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:10px 14px;">${rows}</div>
+      <div id="hist-edit-${di}" style="display:none;margin-top:8px;background:var(--bg3);border-radius:var(--radius);padding:12px;">
+        <div style="font-size:11px;color:var(--gold);margin-bottom:10px;">種目・重量・repを修正</div>
+        ${editRows}
+        <button onclick="applyEditPanel('hs${di}',${JSON.stringify(realIdxArr)},'hist-edit-${di}','stats')" style="width:100%;padding:9px;background:var(--gold);color:#000;border:none;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;">✓ 修正を適用</button>
+      </div>
     </div>`;
   }).join('');
 
@@ -1639,7 +1801,7 @@ function renderStats(){
         <span style="font-size:11px;color:var(--text2);display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:var(--green);display:inline-block;"></span>炭水化物</span>
       </div>
       <div class="chart-wrap"><canvas id="chartPFC" role="img" aria-label="PFC推移グラフ">PFCデータ</canvas></div></div>`:''})()}
-    ${recentSessions.length?`<div class="card"><div class="card-title">🕐 最近のセッション</div>${histHTML}</div>`:''}`;
+    ${recentDates.length?`<div class="card"><div class="card-title">🕐 最近のセッション</div>${histHTML}</div>`:''}`;
 
   setTimeout(()=>{
     window._allEx=allEx;
@@ -1648,6 +1810,7 @@ function renderStats(){
     if(new Set(mealHistory.map(m=>m.date)).size>=3&&document.getElementById('chartPFC')) buildPFCChart();
   },80);
 }
+
 
 function toggleSessionDetail(id,chevId){
   const el=document.getElementById(id);
