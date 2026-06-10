@@ -3,25 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GymLog AI</title>
+<title>FORMA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0f0f0f;
-  --bg2: #1a1a1a;
-  --bg3: #242424;
-  --border: rgba(255,255,255,0.08);
-  --border2: rgba(255,255,255,0.15);
-  --text: #f0f0f0;
-  --text2: #888;
-  --text3: #555;
-  --gold: #c9a84c;
-  --gold2: #e8c97a;
-  --blue: #4a9eff;
-  --green: #4caf7d;
-  --amber: #e8922a;
-  --red: #e85555;
+  --bg: #07090c;
+  --bg2: #0d1117;
+  --bg3: #151c26;
+  --border: rgba(56,189,248,0.08);
+  --border2: rgba(56,189,248,0.18);
+  --text: #e2edf7;
+  --text2: #7a9ab8;
+  --text3: #3d5470;
+  --cyan: #38bdf8;
+  --cyan2: #7dd3fc;
+  --blue: #3b82f6;
+  --green: #10b981;
+  --amber: #f59e0b;
+  --red: #f87171;
   --radius: 10px;
   --radius-lg: 16px;
 }
@@ -29,6 +29,7 @@
 body {
   font-family: 'Noto Sans JP', sans-serif;
   background: var(--bg);
+  background-image: radial-gradient(ellipse 100% 35% at 50% 0%, rgba(56,189,248,0.07) 0%, transparent 70%);
   color: var(--text);
   min-height: 100vh;
   font-size: 14px;
@@ -40,18 +41,25 @@ header {
   padding: 24px 20px 0;
   border-bottom: 0.5px solid var(--border);
   margin-bottom: 0;
+  background: linear-gradient(180deg, rgba(56,189,248,0.05) 0%, transparent 100%);
 }
 .header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
-.logo { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; color: var(--gold); letter-spacing: -0.5px; }
-/* logo span removed */
+.logo {
+  font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500;
+  color: var(--cyan); letter-spacing: 0.18em; text-transform: uppercase;
+  text-shadow: 0 0 20px rgba(56,189,248,0.4);
+}
 /* ── Tabs ── */
 .tabs { display: flex; border-bottom: 0.5px solid var(--border); }
 .tab {
   flex: 1; padding: 12px 4px; text-align: center; font-size: 13px;
   cursor: pointer; color: var(--text3); border: none; background: none;
-  border-bottom: 2px solid transparent; transition: all .15s;
+  border-bottom: 2px solid transparent; transition: all .2s;
 }
-.tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+.tab.active {
+  color: var(--cyan); border-bottom-color: var(--cyan);
+  text-shadow: 0 0 10px rgba(56,189,248,0.45);
+}
 /* ── Sections ── */
 .section { display: none; padding: 20px; }
 .section.active { display: block; }
@@ -65,7 +73,7 @@ header {
   background: var(--bg2);
   transition: border-color .15s, background .15s;
 }
-.upload-area:hover { border-color: var(--gold); background: var(--bg3); }
+.upload-area:hover { border-color: var(--cyan); background: var(--bg3); }
 .upload-area .icon { font-size: 32px; margin-bottom: 8px; }
 .upload-area p { font-size: 13px; color: var(--text2); }
 .upload-area img { max-width: 100%; max-height: 180px; border-radius: var(--radius); margin-top: 12px; object-fit: contain; }
@@ -73,24 +81,28 @@ header {
 /* ── Buttons ── */
 .btn-main {
   width: 100%; padding: 13px; border-radius: var(--radius);
-  background: var(--gold); color: #000;
+  background: var(--cyan); color: #000;
   border: none; font-size: 14px; font-weight: 700;
   cursor: pointer; margin-top: 12px;
-  transition: background .15s, transform .1s;
+  transition: background .15s, transform .1s, box-shadow .2s;
   font-family: 'Noto Sans JP', sans-serif;
+  letter-spacing: 0.02em;
 }
-.btn-main:hover { background: var(--gold2); }
+.btn-main:not(:disabled):hover {
+  background: var(--cyan2);
+  box-shadow: 0 4px 24px rgba(56,189,248,0.28), 0 0 0 1px rgba(56,189,248,0.15);
+}
 .btn-main:active { transform: scale(0.98); }
-.btn-main:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+.btn-main:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
 .btn-sm {
   font-size: 12px; padding: 6px 12px;
   border-radius: var(--radius); cursor: pointer;
   background: var(--bg3); color: var(--text2);
   border: 0.5px solid var(--border2);
-  transition: background .15s;
+  transition: all .15s;
   font-family: 'Noto Sans JP', sans-serif;
 }
-.btn-sm:hover { background: var(--border2); color: var(--text); }
+.btn-sm:hover { background: rgba(56,189,248,0.08); color: var(--text); border-color: rgba(56,189,248,0.3); }
 /* ── Cards ── */
 .card {
   background: var(--bg2);
@@ -99,12 +111,12 @@ header {
   padding: 16px;
   margin-top: 12px;
 }
-.card-title { font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 10px; }
+.card-title { font-size: 12px; font-weight: 500; color: var(--text3); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
 /* ── Loading / Error ── */
 .loading { text-align: center; padding: 24px; color: var(--text2); font-size: 13px; }
 .spin {
   display: inline-block; width: 18px; height: 18px;
-  border: 2px solid var(--border2); border-top-color: var(--gold);
+  border: 2px solid var(--border2); border-top-color: var(--cyan);
   border-radius: 50%; animation: spin .8s linear infinite;
   margin-right: 8px; vertical-align: middle;
 }
@@ -121,13 +133,13 @@ header {
 .caption-box {
   background: var(--bg3); border-radius: var(--radius); padding: 12px;
   font-size: 13px; line-height: 1.8; white-space: pre-wrap; color: var(--text);
-  border-left: 2px solid var(--gold);
+  border-left: 2px solid var(--cyan);
 }
 .tags { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
 .tag {
   font-size: 11px; padding: 4px 10px; border-radius: 20px;
-  background: rgba(201,168,76,0.12); color: var(--gold);
-  border: 0.5px solid rgba(201,168,76,0.3);
+  background: rgba(56,189,248,0.12); color: var(--cyan);
+  border: 0.5px solid rgba(56,189,248,0.3);
 }
 /* ── Exercise list ── */
 .ex-item { padding: 8px 0; border-bottom: 0.5px solid var(--border); }
@@ -156,32 +168,32 @@ header {
   border: 0.5px solid var(--border2); background: var(--bg3);
   cursor: pointer; text-align: center; transition: all .15s; color: var(--text);
 }
-.goal-btn.active { border: 2px solid var(--gold); background: rgba(201,168,76,0.1); }
+.goal-btn.active { border: 2px solid var(--cyan); background: rgba(56,189,248,0.1); }
 .goal-btn .gb-emoji { font-size: 20px; display: block; margin-bottom: 4px; }
 .goal-btn .gb-name { font-size: 13px; font-weight: 700; color: var(--text); }
-.goal-btn.active .gb-name { color: var(--gold); }
+.goal-btn.active .gb-name { color: var(--cyan); }
 .goal-btn .gb-desc { font-size: 11px; color: var(--text2); margin-top: 2px; }
 .sex-btn { padding: 7px 16px; border-radius: var(--radius); border: 0.5px solid var(--border2); background: var(--bg3); color: var(--text2); cursor: pointer; font-size: 13px; transition: all .15s; }
-.sex-btn.active { background: rgba(201,168,76,0.15); color: var(--gold); border-color: var(--gold); font-weight: 700; }
+.sex-btn.active { background: rgba(56,189,248,0.15); color: var(--cyan); border-color: var(--cyan); font-weight: 700; }
 .calc-result { background: var(--bg3); border-radius: var(--radius); padding: 12px; margin-top: 10px; }
 .calc-kcal { text-align: center; font-size: 13px; color: var(--text2); margin-bottom: 10px; }
-.calc-kcal span { font-size: 22px; font-weight: 700; color: var(--gold); font-family: 'DM Mono', monospace; }
+.calc-kcal span { font-size: 22px; font-weight: 700; color: var(--cyan); font-family: 'DM Mono', monospace; }
 .calc-note { font-size: 11px; color: var(--text3); margin-top: 8px; line-height: 1.6; }
 /* ── Stats ── */
 .metric-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 14px; }
 .metric { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 14px; text-align: center; }
-.metric-val { font-size: 24px; font-weight: 700; color: var(--gold); font-family: 'DM Mono', monospace; }
+.metric-val { font-size: 24px; font-weight: 700; color: var(--cyan); font-family: 'DM Mono', monospace; }
 .metric-label { font-size: 11px; color: var(--text2); margin-top: 4px; }
 .history-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 0.5px solid var(--border); }
 .history-item:last-child { border-bottom: none; }
-.badge { font-size: 11px; padding: 3px 9px; border-radius: 20px; background: rgba(201,168,76,0.12); color: var(--gold); border: 0.5px solid rgba(201,168,76,0.3); }
+.badge { font-size: 11px; padding: 3px 9px; border-radius: 20px; background: rgba(56,189,248,0.12); color: var(--cyan); border: 0.5px solid rgba(56,189,248,0.3); }
 .empty-state { text-align: center; padding: 40px 20px; color: var(--text3); font-size: 13px; line-height: 2; }
 /* ── Chart wrapper ── */
 .chart-wrap { position: relative; width: 100%; height: 180px; margin-top: 12px; }
 /* ── Toast ── */
 .toast {
   position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
-  background: var(--gold); color: #000; font-weight: 700; font-size: 13px;
+  background: var(--cyan); color: #000; font-weight: 700; font-size: 13px;
   padding: 10px 20px; border-radius: 20px; transition: transform .3s;
   pointer-events: none; z-index: 999;
 }
@@ -191,7 +203,7 @@ header {
 .upload-area::before {
   content: ''; position: absolute; inset: 0;
   border-radius: var(--radius-lg);
-  background: linear-gradient(135deg, rgba(201,168,76,0.03), transparent);
+  background: linear-gradient(135deg, rgba(56,189,248,0.03), transparent);
   pointer-events: none;
 }
 /* ── Tab labels ── */
@@ -204,22 +216,38 @@ header {
 .api-dot.ok { background:var(--green); }
 
 /* ── Card hover ── */
-.card { transition: border-color .2s; }
-.card:hover { border-color: rgba(255,255,255,0.12); }
+.card { transition: border-color .2s, box-shadow .2s; }
+.card:hover { border-color: rgba(56,189,248,0.2); box-shadow: 0 0 0 1px rgba(56,189,248,0.04) inset; }
 /* ── Section fade-in ── */
 .section.active { animation: fadeIn .2s ease; }
 @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
 /* ── Metric accent ── */
-.metric:first-child { border-left: 2px solid var(--gold); }
-/* ── Gold divider ── */
-.gold-divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(201,168,76,0.3), transparent); margin: 16px 0; }
+.metric:first-child { border-left: 2px solid var(--cyan); box-shadow: inset 2px 0 8px rgba(56,189,248,0.08); }
+/* ── Cyan divider ── */
+.gold-divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(56,189,248,0.3), transparent); margin: 16px 0; }
+/* ── Input focus ── */
+input:focus {
+  outline: none;
+  border-color: rgba(56,189,248,0.5) !important;
+  box-shadow: 0 0 0 3px rgba(56,189,248,0.08);
+}
+/* ── Upload area hover glow ── */
+.upload-area:hover {
+  border-color: var(--cyan) !important;
+  box-shadow: 0 0 20px rgba(56,189,248,0.08);
+}
+/* ── Toast glow ── */
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  box-shadow: 0 4px 20px rgba(56,189,248,0.3);
+}
 </style>
 </head>
 <body>
 <div class="app">
   <header>
     <div class="header-top">
-      <div class="logo">GymLog AI <span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:400;letter-spacing:0;">v0.9 beta</span></div>
+      <div class="logo">FORMA<span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:400;letter-spacing:0;margin-left:8px;opacity:0.6;">beta</span></div>
       <button class="api-toggle" onclick="toggleApiDrawer()" id="api-toggle-btn">
         <div class="api-dot" id="api-dot"></div>
         <span style="font-size:12px;color:var(--text2);">API Key</span>
@@ -230,7 +258,7 @@ header {
       <div style="padding:8px 0 12px;display:flex;align-items:center;gap:8px;">
         <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off"
           style="flex:1;padding:8px 10px;font-size:13px;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius);color:var(--text);font-family:'DM Mono',monospace;">
-        <button onclick="saveKey()" style="padding:8px 14px;background:var(--gold);color:#000;border:none;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;">保存</button>
+        <button onclick="saveKey()" style="padding:8px 14px;background:var(--cyan);color:#000;border:none;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;">保存</button>
       </div>
       <div class="key-status" id="keyStatus" style="margin-top:-8px;padding-bottom:8px;font-size:11px;"></div>
     </div>
@@ -249,7 +277,7 @@ header {
     <!-- モード切替 -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
       <button id="mode-btn-manual" onclick="setTrainingMode('manual')"
-        style="padding:12px;border-radius:var(--radius-lg);border:2px solid var(--gold);background:rgba(201,168,76,0.1);color:var(--gold);font-size:13px;font-weight:700;cursor:pointer;">
+        style="padding:12px;border-radius:var(--radius-lg);border:2px solid var(--cyan);background:rgba(56,189,248,0.1);color:var(--cyan);font-size:13px;font-weight:700;cursor:pointer;">
         手動入力
       </button>
       <button id="mode-btn-ocr" onclick="setTrainingMode('ocr')"
@@ -266,7 +294,7 @@ header {
         <div style="display:flex;align-items:center;gap:6px;">
           <span style="font-size:11px;color:var(--text3);">前回提案</span>
           <div onclick="toggleSuggestion()" id="suggest-toggle"
-            style="width:36px;height:20px;border-radius:20px;background:var(--gold);cursor:pointer;position:relative;transition:background .2s;">
+            style="width:36px;height:20px;border-radius:20px;background:var(--cyan);cursor:pointer;position:relative;transition:background .2s;">
             <div id="suggest-knob" style="position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:right .2s;"></div>
           </div>
         </div>
@@ -275,7 +303,7 @@ header {
       <!-- 分割法タブ -->
       <div style="display:flex;gap:6px;margin-bottom:14px;">
         <button id="split-btn-muscle" onclick="setSplitMode('muscle')"
-          style="flex:1;padding:8px 4px;border-radius:var(--radius);border:2px solid var(--gold);background:rgba(201,168,76,0.1);color:var(--gold);font-size:12px;font-weight:700;cursor:pointer;">部位別</button>
+          style="flex:1;padding:8px 4px;border-radius:var(--radius);border:2px solid var(--cyan);background:rgba(56,189,248,0.1);color:var(--cyan);font-size:12px;font-weight:700;cursor:pointer;">部位別</button>
         <button id="split-btn-ppl" onclick="setSplitMode('ppl')"
           style="flex:1;padding:8px 4px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:12px;cursor:pointer;">PPL</button>
         <button id="split-btn-updown" onclick="setSplitMode('updown')"
@@ -311,7 +339,7 @@ header {
       <div id="upload-wrap-training">
         <div class="upload-area" onclick="document.getElementById('file-training').click()">
           <div class="icon">📷</div>
-          <p>ノートを撮影してアップロード<br><span style="font-size:11px;">JPEG / PNG / HEIC 対応</span><br><span style="font-size:11px;color:var(--gold);">日付が書いてあれば過去の記録も登録できます</span></p>
+          <p>ノートを撮影してアップロード<br><span style="font-size:11px;">JPEG / PNG / HEIC 対応</span><br><span style="font-size:11px;color:var(--cyan);">日付が書いてあれば過去の記録も登録できます</span></p>
         </div>
         <input type="file" id="file-training" accept="image/*" style="display:none;" onchange="onFile(event,'training')">
         <button class="btn-main" id="btn-training" disabled onclick="analyzeTraining()">🧠 AIで読み取る・保存する</button>
@@ -371,8 +399,8 @@ header {
         <button class="act-btn" id="abtn-1" onclick="setActivity('1')" style="padding:8px 2px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg3);cursor:pointer;text-align:center;">
           <div style="font-size:16px;">🚶</div><div style="font-size:10px;color:var(--text2);margin-top:3px;">週1〜2<br>軽め</div>
         </button>
-        <button class="act-btn active" id="abtn-2" onclick="setActivity('2')" style="padding:8px 2px;border-radius:var(--radius);border:0.5px solid var(--gold);background:rgba(201,168,76,0.1);cursor:pointer;text-align:center;">
-          <div style="font-size:16px;">🏋️</div><div style="font-size:10px;color:var(--gold);margin-top:3px;">週3〜4<br>普通</div>
+        <button class="act-btn active" id="abtn-2" onclick="setActivity('2')" style="padding:8px 2px;border-radius:var(--radius);border:0.5px solid var(--cyan);background:rgba(56,189,248,0.1);cursor:pointer;text-align:center;">
+          <div style="font-size:16px;">🏋️</div><div style="font-size:10px;color:var(--cyan);margin-top:3px;">週3〜4<br>普通</div>
         </button>
         <button class="act-btn" id="abtn-3" onclick="setActivity('3')" style="padding:8px 2px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg3);cursor:pointer;text-align:center;">
           <div style="font-size:16px;">🔥</div><div style="font-size:10px;color:var(--text2);margin-top:3px;">週5〜6<br>ハード</div>
@@ -404,9 +432,9 @@ header {
             <div style="font-size:16px;font-weight:700;color:var(--text2);font-family:'DM Mono',monospace;" id="calc-tdee">--</div>
             <div style="font-size:10px;color:var(--text3);">kcal</div>
           </div>
-          <div style="background:var(--bg2);border-radius:var(--radius);padding:10px;text-align:center;border:0.5px solid var(--gold);">
-            <div style="font-size:10px;color:var(--gold);margin-bottom:4px;">目標カロリー</div>
-            <div style="font-size:16px;font-weight:700;color:var(--gold);font-family:'DM Mono',monospace;" id="calc-kcal">--</div>
+          <div style="background:var(--bg2);border-radius:var(--radius);padding:10px;text-align:center;border:0.5px solid var(--cyan);">
+            <div style="font-size:10px;color:var(--cyan);margin-bottom:4px;">目標カロリー</div>
+            <div style="font-size:16px;font-weight:700;color:var(--cyan);font-family:'DM Mono',monospace;" id="calc-kcal">--</div>
             <div style="font-size:10px;color:var(--text3);" id="calc-diff">kcal</div>
           </div>
         </div>
@@ -526,9 +554,9 @@ function setActivity(a, recalc=true){
     const btn=document.getElementById('abtn-'+k);
     if(!btn) return;
     if(k===a){
-      btn.style.border='0.5px solid var(--gold)';
-      btn.style.background='rgba(201,168,76,0.1)';
-      btn.querySelector('div:last-child').style.color='var(--gold)';
+      btn.style.border='0.5px solid var(--cyan)';
+      btn.style.background='rgba(56,189,248,0.1)';
+      btn.querySelector('div:last-child').style.color='var(--cyan)';
     } else {
       btn.style.border='0.5px solid var(--border2)';
       btn.style.background='var(--bg3)';
@@ -751,7 +779,7 @@ function renderTrainingResult(data,saved){
       </div>
       ${exHTML||'<p style="color:var(--text2);font-size:13px;">種目を検出できませんでした</p>'}
       <div id="ocr-edit-${idx}" style="display:none;margin-top:12px;background:var(--bg3);border-radius:var(--radius);padding:12px;overflow:hidden;">
-        <div style="font-size:11px;color:var(--gold);margin-bottom:10px;">種目・重量・repを修正できます</div>
+        <div style="font-size:11px;color:var(--cyan);margin-bottom:10px;">種目・重量・repを修正できます</div>
         <div id="ocr-edit-rows-${idx}">
           ${(data.exercises||[]).map((e,ei)=>`
             <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:0.5px solid var(--border);">
@@ -766,7 +794,7 @@ function renderTrainingResult(data,saved){
                 </div>`).join('')}
             </div>`).join('')}
         </div>
-        <button onclick="applyOcrEdit(${idx})" style="width:100%;padding:8px;background:var(--gold);color:#000;border:none;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;">✓ 修正を適用</button>
+        <button onclick="applyOcrEdit(${idx})" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;">✓ 修正を適用</button>
       </div>
     </div>`;
   pushInstaCard({type:'training', data});
@@ -835,7 +863,7 @@ function renderMealResult(data, saved){
   if(advices.length>0){
     setTimeout(()=>{
       const advEl=document.getElementById('meal-advice');
-      if(advEl) advEl.innerHTML=advices.map(a=>`<div style="padding:6px 10px;margin-bottom:4px;background:rgba(201,168,76,0.08);border-radius:var(--radius);border-left:2px solid var(--gold);font-size:12px;color:var(--text2);">${a}</div>`).join('');
+      if(advEl) advEl.innerHTML=advices.map(a=>`<div style="padding:6px 10px;margin-bottom:4px;background:rgba(56,189,248,0.08);border-radius:var(--radius);border-left:2px solid var(--cyan);font-size:12px;color:var(--text2);">${a}</div>`).join('');
     },300);
   }
 }
@@ -865,20 +893,20 @@ function renderTodayMeals(d){
         </div>
       </div>
       <div id="meal-edit-${realIdx}" style="display:none;margin-bottom:10px;background:var(--bg3);border-radius:var(--radius);padding:10px;">
-        <div style="font-size:11px;color:var(--gold);margin-bottom:8px;">メニュー名を変更するとAIがカロリー・PFCを再計算します</div>
+        <div style="font-size:11px;color:var(--cyan);margin-bottom:8px;">メニュー名を変更するとAIがカロリー・PFCを再計算します</div>
         <div style="margin-bottom:6px;"><div style="font-size:11px;color:var(--text3);margin-bottom:3px;">メニュー名</div>
           <input id="edit-name-${realIdx}" value="${m.meal_name||''}" style="width:100%;padding:6px;font-size:13px;background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius);color:var(--text);">
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr repeat(3,1fr);gap:5px;margin-bottom:8px;">
           <div><div style="font-size:10px;color:var(--text3);margin-bottom:2px;">kcal</div><input id="edit-cal-${realIdx}" type="number" value="${Math.round(m.calories||0)}" style="width:100%;padding:5px;font-size:12px;background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius);color:var(--text);"></div>
-          <div><div style="font-size:10px;color:var(--text3);margin-bottom:2px;">　</div><button onclick="recalcMeal(${realIdx})" style="width:100%;height:30px;margin-top:4px;background:rgba(201,168,76,0.2);color:var(--gold);border:0.5px solid var(--gold);border-radius:var(--radius);font-size:11px;cursor:pointer;">🧠 再計算</button></div>
+          <div><div style="font-size:10px;color:var(--text3);margin-bottom:2px;">　</div><button onclick="recalcMeal(${realIdx})" style="width:100%;height:30px;margin-top:4px;background:rgba(56,189,248,0.2);color:var(--cyan);border:0.5px solid var(--cyan);border-radius:var(--radius);font-size:11px;cursor:pointer;">🧠 再計算</button></div>
           <div><div style="font-size:10px;color:var(--blue);margin-bottom:2px;">P(g)</div><input id="edit-p-${realIdx}" type="number" value="${Math.round(m.protein||0)}" style="width:100%;padding:5px;font-size:12px;background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius);color:var(--text);"></div>
           <div><div style="font-size:10px;color:var(--amber);margin-bottom:2px;">F(g)</div><input id="edit-f-${realIdx}" type="number" value="${Math.round(m.fat||0)}" style="width:100%;padding:5px;font-size:12px;background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius);color:var(--text);"></div>
           <div><div style="font-size:10px;color:var(--green);margin-bottom:2px;">C(g)</div><input id="edit-c-${realIdx}" type="number" value="${Math.round(m.carbs||0)}" style="width:100%;padding:5px;font-size:12px;background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius);color:var(--text);"></div>
         </div>
-        <button onclick="applyMealEdit(${realIdx})" style="width:100%;padding:7px;background:var(--gold);color:#000;border:none;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;">✓ 適用</button>
+        <button onclick="applyMealEdit(${realIdx})" style="width:100%;padding:7px;background:var(--cyan);color:#000;border:none;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;">✓ 適用</button>
       </div>
-      <p style="font-size:20px;font-weight:700;color:var(--gold);font-family:'DM Mono',monospace;" id="meal-kcal-${realIdx}">${Math.round(m.calories||0)} <span style="font-size:12px;color:var(--text2);">kcal</span></p>
+      <p style="font-size:20px;font-weight:700;color:var(--cyan);font-family:'DM Mono',monospace;" id="meal-kcal-${realIdx}">${Math.round(m.calories||0)} <span style="font-size:12px;color:var(--text2);">kcal</span></p>
       <div class="pfc-grid" style="margin-top:6px;">
         <div class="pfc-cell"><div class="pfc-val" style="color:var(--blue);" id="meal-p-${realIdx}">${Math.round(m.protein||0)}g</div><div class="pfc-label">タンパク質</div></div>
         <div class="pfc-cell"><div class="pfc-val" style="color:var(--amber);" id="meal-f-${realIdx}">${Math.round(m.fat||0)}g</div><div class="pfc-label">脂質</div></div>
@@ -1064,8 +1092,8 @@ const MUSCLE_GROUPS = {
     'HIIT': ['バーピー','マウンテンクライマー','ジャンピングジャック','スプリントインターバル'],
   },
 };
-const MUSCLE_COLORS = {'胸':'#e85555','背中':'#4a9eff','肩':'#9b59b6','腕':'#e8922a','脚':'#4caf7d','腹':'#c9a84c','有酸素':'#1abc9c'};
-const SUB_COLORS = {'バーベル':'#c9a84c','ダンベル':'#4a9eff','マシン':'#4caf7d','自重':'#888','屋外':'#1abc9c','HIIT':'#e85555'};
+const MUSCLE_COLORS = {'胸':'#fb7185','背中':'#60a5fa','肩':'#c084fc','腕':'#fbbf24','脚':'#34d399','腹':'#38bdf8','有酸素':'#2dd4bf'};
+const SUB_COLORS = {'バーベル':'#94a3b8','ダンベル':'#94a3b8','マシン':'#94a3b8','自重':'#64748b','屋外':'#94a3b8','HIIT':'#fb7185'};
 
 // ── 種目名3段階セレクト生成 ──
 function buildExerciseSelect(id, currentName){
@@ -1108,7 +1136,7 @@ function updateExList(baseId){
 const PPL_GROUPS = {
   'Push': {
     label:'Push（胸・肩・三頭）',
-    color:'#e85555',
+    color:'#fb7185',
     parts:['胸','肩'],
     extraSub:{'三頭筋':{
       'バーベル':['クローズグリップベンチ','EZバースカルクラッシャー'],
@@ -1119,7 +1147,7 @@ const PPL_GROUPS = {
   },
   'Pull': {
     label:'Pull（背中・二頭）',
-    color:'#4a9eff',
+    color:'#60a5fa',
     parts:['背中'],
     extraSub:{'二頭筋':{
       'バーベル':['バーベルカール','EZバーカール'],
@@ -1130,7 +1158,7 @@ const PPL_GROUPS = {
   },
   'Legs': {
     label:'Legs（脚・腹）',
-    color:'#4caf7d',
+    color:'#34d399',
     parts:['脚','腹'],
     extraSub:{}
   },
@@ -1138,8 +1166,8 @@ const PPL_GROUPS = {
 
 // 上半身/下半身定義
 const UPDOWN_GROUPS = {
-  '上半身': {label:'上半身（胸・背中・肩・腕）',color:'#9b59b6',parts:['胸','背中','肩','腕'],extraSub:{}},
-  '下半身': {label:'下半身（脚・腹）',color:'#4caf7d',parts:['脚','腹'],extraSub:{}},
+  '上半身': {label:'上半身（胸・背中・肩・腕）',color:'#c084fc',parts:['胸','背中','肩','腕'],extraSub:{}},
+  '下半身': {label:'下半身（脚・腹）',color:'#34d399',parts:['脚','腹'],extraSub:{}},
 };
 
 let currentSplitMode='muscle'; // 'muscle' | 'ppl' | 'updown'
@@ -1156,9 +1184,9 @@ function setSplitMode(mode){
   ['muscle','ppl','updown'].forEach(m=>{
     const btn=document.getElementById('split-btn-'+m);
     const active=m===mode;
-    btn.style.border=active?'2px solid var(--gold)':'0.5px solid var(--border2)';
-    btn.style.background=active?'rgba(201,168,76,0.1)':'var(--bg3)';
-    btn.style.color=active?'var(--gold)':'var(--text2)';
+    btn.style.border=active?'2px solid var(--cyan)':'0.5px solid var(--border2)';
+    btn.style.background=active?'rgba(56,189,248,0.1)':'var(--bg3)';
+    btn.style.color=active?'var(--cyan)':'var(--text2)';
     btn.style.fontWeight=active?'700':'400';
   });
   const label=document.getElementById('group-select-label');
@@ -1181,8 +1209,8 @@ function setTrainingMode(mode){
   document.getElementById('training-manual').style.display=isM?'block':'none';
   document.getElementById('training-ocr').style.display=isM?'none':'block';
   const mb=document.getElementById('mode-btn-manual'), ob=document.getElementById('mode-btn-ocr');
-  mb.style.cssText+=`;border:${isM?'2px solid var(--gold)':'0.5px solid var(--border2)'};background:${isM?'rgba(201,168,76,0.1)':'var(--bg3)'};color:${isM?'var(--gold)':'var(--text2)'};font-weight:${isM?700:400}`;
-  ob.style.cssText+=`;border:${!isM?'2px solid var(--gold)':'0.5px solid var(--border2)'};background:${!isM?'rgba(201,168,76,0.1)':'var(--bg3)'};color:${!isM?'var(--gold)':'var(--text2)'};font-weight:${!isM?700:400}`;
+  mb.style.cssText+=`;border:${isM?'2px solid var(--cyan)':'0.5px solid var(--border2)'};background:${isM?'rgba(56,189,248,0.1)':'var(--bg3)'};color:${isM?'var(--cyan)':'var(--text2)'};font-weight:${isM?700:400}`;
+  ob.style.cssText+=`;border:${!isM?'2px solid var(--cyan)':'0.5px solid var(--border2)'};background:${!isM?'rgba(56,189,248,0.1)':'var(--bg3)'};color:${!isM?'var(--cyan)':'var(--text2)'};font-weight:${!isM?700:400}`;
 }
 function editTrainingDate(){
   // 日付変更モーダル表示
@@ -1209,7 +1237,7 @@ function editTrainingDate(){
     </div>
     <div style="display:flex;gap:8px;">
       <button onclick="document.getElementById('date-modal').remove()" style="flex:1;padding:10px;border-radius:var(--radius);background:var(--bg3);color:var(--text2);border:0.5px solid var(--border2);cursor:pointer;font-size:13px;">キャンセル</button>
-      <button onclick="applyTrainingDate()" style="flex:1;padding:10px;border-radius:var(--radius);background:var(--gold);color:#000;border:none;cursor:pointer;font-size:13px;font-weight:700;">決定</button>
+      <button onclick="applyTrainingDate()" style="flex:1;padding:10px;border-radius:var(--radius);background:var(--cyan);color:#000;border:none;cursor:pointer;font-size:13px;font-weight:700;">決定</button>
     </div>
   </div>`;
   document.body.appendChild(modal);
@@ -1229,7 +1257,7 @@ function renderMuscleGroupBtns(){
   if(!el) return;
   if(currentSplitMode==='muscle'){
     el.innerHTML=Object.keys(MUSCLE_GROUPS).map(g=>{
-      const c=MUSCLE_COLORS[g]||'var(--gold)', active=g===currentMuscleGroup;
+      const c=MUSCLE_COLORS[g]||'var(--cyan)', active=g===currentMuscleGroup;
       return `<button onclick="selectGroup('${g}')" style="padding:8px 14px;border-radius:20px;border:${active?`2px solid ${c}`:`1.5px solid var(--border2)`};background:${active?c+'22':'var(--bg3)'};color:${active?c:'var(--text2)'};font-size:13px;font-weight:${active?700:400};cursor:pointer;">${g}</button>`;
     }).join('');
   } else {
@@ -1274,7 +1302,7 @@ function renderSubGroup(sub,exs){
   const btns=exs.map(ex=>{
     const sel=selectedExercises.find(e=>e.name===ex);
     const safe=ex.replace(/'/g,"\\'");
-    return '<button onclick="toggleExercise(\''+safe+'\',\''+subName+'\')" style="padding:6px 11px;border-radius:20px;border:'+(sel?'2px solid var(--gold)':'1px solid var(--border2)')+';background:'+(sel?'rgba(201,168,76,0.12)':'var(--bg2)')+';color:'+(sel?'var(--gold)':'var(--text2)')+';font-size:12px;font-weight:'+(sel?700:400)+';cursor:pointer;margin-bottom:4px;">'+ex+(sel?' ✓':'')+'</button>';
+    return '<button onclick="toggleExercise(\''+safe+'\',\''+subName+'\')" style="padding:6px 11px;border-radius:20px;border:'+(sel?'2px solid var(--cyan)':'1px solid var(--border2)')+';background:'+(sel?'rgba(56,189,248,0.12)':'var(--bg2)')+';color:'+(sel?'var(--cyan)':'var(--text2)')+';font-size:12px;font-weight:'+(sel?700:400)+';cursor:pointer;margin-bottom:4px;">'+ex+(sel?' ✓':'')+'</button>';
   }).join('');
   return '<div style="margin-bottom:12px;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;"><span style="font-size:10px;padding:2px 7px;border-radius:20px;background:'+partColor+'22;color:'+partColor+';border:0.5px solid '+partColor+';">'+partName+'</span><span style="font-size:11px;font-weight:700;color:'+subColor+';">'+subName+'</span></div><div style="display:flex;flex-wrap:wrap;gap:5px;">'+btns+'</div></div>';
 }
@@ -1317,8 +1345,8 @@ function renderSetsArea(){
   if(sb) sb.style.display='block';
   el.innerHTML=selectedExercises.map((ex,ei)=>{
     const pm=getPastMax(ex.name);
-    const pmHTML=pm?`<span style="font-size:11px;color:var(--text3);margin-left:6px;">過去最高 <span style="color:var(--gold);font-weight:700;">${pm}kg</span></span>`:'';
-    const color=MUSCLE_COLORS[currentMuscleGroup]||'var(--gold)';
+    const pmHTML=pm?`<span style="font-size:11px;color:var(--text3);margin-left:6px;">過去最高 <span style="color:var(--cyan);font-weight:700;">${pm}kg</span></span>`:'';
+    const color=MUSCLE_COLORS[currentMuscleGroup]||'var(--cyan)';
     const sHTML=ex.sets.map((s,si)=>`
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
         <div style="font-size:11px;color:var(--text3);width:36px;text-align:center;font-family:'DM Mono',monospace;flex-shrink:0;">Set${si+1}</div>
@@ -1481,9 +1509,9 @@ function renderTodayTrainingLog(){
     </div>
     <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:10px 14px;">${rows}</div>
     <div id="today-edit" style="display:none;margin-top:8px;background:var(--bg3);border-radius:var(--radius);padding:12px;">
-      <div style="font-size:11px;color:var(--gold);margin-bottom:10px;">種目・重量・repを修正</div>
+      <div style="font-size:11px;color:var(--cyan);margin-bottom:10px;">種目・重量・repを修正</div>
       ${editRows}
-      <button onclick="applyEditPanel('td',${JSON.stringify(realIdxArr)},'today-edit','today')" style="width:100%;padding:9px;background:var(--gold);color:#000;border:none;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;">✓ 修正を適用</button>
+      <button onclick="applyEditPanel('td',${JSON.stringify(realIdxArr)},'today-edit','today')" style="width:100%;padding:9px;background:var(--cyan);color:#000;border:none;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;">✓ 修正を適用</button>
     </div>
   </div>`;
 }
@@ -1495,7 +1523,7 @@ function toggleSuggestion(){
   const knob=document.getElementById('suggest-knob');
   const toggle=document.getElementById('suggest-toggle');
   if(knob){ knob.style.right=suggestionOn?'2px':'18px'; }
-  if(toggle){ toggle.style.background=suggestionOn?'var(--gold)':'var(--bg3)'; }
+  if(toggle){ toggle.style.background=suggestionOn?'var(--cyan)':'var(--bg3)'; }
   lsSet('gl-suggest-on',suggestionOn);
 }
 function getLastSession(exName){
@@ -1515,10 +1543,10 @@ function getSuggestionHTML(exName, fi){
   const dataId='sugg-'+fi;
   window._suggData=window._suggData||{};
   window._suggData[dataId]={name:exName, sets:last.sets};
-  return `<div style="display:flex;align-items:center;gap:8px;margin-top:4px;margin-bottom:8px;padding:6px 10px;background:rgba(201,168,76,0.08);border-radius:var(--radius);border-left:2px solid var(--gold);">
-    <span style="font-size:11px;color:var(--gold);">前回</span>
+  return `<div style="display:flex;align-items:center;gap:8px;margin-top:4px;margin-bottom:8px;padding:6px 10px;background:rgba(56,189,248,0.08);border-radius:var(--radius);border-left:2px solid var(--cyan);">
+    <span style="font-size:11px;color:var(--cyan);">前回</span>
     <span style="font-size:12px;color:var(--text2);font-family:'DM Mono',monospace;">${last.date.slice(5)}　${last.sets.map(s=>`${s.weight}×${s.reps}`).join(' / ')}</span>
-    <button onclick="applyLastSession('${dataId}')" style="margin-left:auto;font-size:11px;padding:3px 10px;border-radius:20px;background:rgba(201,168,76,0.2);color:var(--gold);border:0.5px solid var(--gold);cursor:pointer;flex-shrink:0;">使う</button>
+    <button onclick="applyLastSession('${dataId}')" style="margin-left:auto;font-size:11px;padding:3px 10px;border-radius:20px;background:rgba(56,189,248,0.2);color:var(--cyan);border:0.5px solid var(--cyan);cursor:pointer;flex-shrink:0;">使う</button>
   </div>`;
 }
 function applyLastSession(dataId){
@@ -1697,9 +1725,9 @@ function updateGoalStats(){
           <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">残り日数</div>
           <div style="font-size:18px;font-weight:700;color:var(--text);font-family:'DM Mono',monospace;">${daysLeft}日</div>
         </div>
-        <div style="background:rgba(201,168,76,0.15);border:0.5px solid rgba(201,168,76,0.4);border-radius:var(--radius);padding:10px;text-align:center;">
-          <div style="font-size:11px;color:var(--gold);margin-bottom:4px;">週-kg目標</div>
-          <div style="font-size:18px;font-weight:700;color:var(--gold);font-family:'DM Mono',monospace;">${weeklyLoss??'--'}kg</div>
+        <div style="background:rgba(56,189,248,0.15);border:0.5px solid rgba(56,189,248,0.4);border-radius:var(--radius);padding:10px;text-align:center;">
+          <div style="font-size:11px;color:var(--cyan);margin-bottom:4px;">週-kg目標</div>
+          <div style="font-size:18px;font-weight:700;color:var(--cyan);font-family:'DM Mono',monospace;">${weeklyLoss??'--'}kg</div>
         </div>
       </div>
       <div>
@@ -1707,7 +1735,7 @@ function updateGoalStats(){
           <span>${cw}kg</span><span>${tw}kg</span>
         </div>
         <div style="background:var(--bg3);border-radius:20px;height:8px;">
-          <div style="width:0%;height:8px;border-radius:20px;background:var(--gold);"></div>
+          <div style="width:0%;height:8px;border-radius:20px;background:var(--cyan);"></div>
         </div>
         <div style="text-align:center;font-size:11px;color:var(--text3);margin-top:6px;">スタート地点</div>
       </div>`;
@@ -1729,8 +1757,8 @@ function updateGoalStats(){
         const isLast=i===steps;
         rows.push(`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border);">
           <div style="font-size:11px;color:var(--text3);width:36px;font-family:'DM Mono',monospace;flex-shrink:0;">${wLabel}</div>
-          <div style="flex:1;background:var(--bg3);border-radius:20px;height:6px;"><div style="width:${pct}%;height:6px;border-radius:20px;background:${isLast?'var(--gold)':'var(--text3)'};"></div></div>
-          <div style="font-size:13px;font-weight:${isLast?700:400};color:${isLast?'var(--gold)':'var(--text)'};font-family:'DM Mono',monospace;width:52px;text-align:right;">${wW} kg</div>
+          <div style="flex:1;background:var(--bg3);border-radius:20px;height:6px;"><div style="width:${pct}%;height:6px;border-radius:20px;background:${isLast?'var(--cyan)':'var(--text3)'};"></div></div>
+          <div style="font-size:13px;font-weight:${isLast?700:400};color:${isLast?'var(--cyan)':'var(--text)'};font-family:'DM Mono',monospace;width:52px;text-align:right;">${wW} kg</div>
         </div>`);
       }
       timelineEl.innerHTML=`<div class="card" style="margin-top:12px;"><div class="card-title">週ごとの目標体重</div>${rows.join('')}</div>`;
@@ -1748,8 +1776,8 @@ function renderGoal(){
   window._selectedDeadline=dl||null;
 
   el.innerHTML=`
-    <div style="background:linear-gradient(135deg,rgba(201,168,76,0.15),rgba(201,168,76,0.03));border:0.5px solid rgba(201,168,76,0.3);border-radius:var(--radius-lg);padding:20px;margin-bottom:4px;">
-      <div style="font-size:11px;color:var(--gold);letter-spacing:1px;margin-bottom:12px;">GOAL SETTING</div>
+    <div style="background:linear-gradient(135deg,rgba(56,189,248,0.15),rgba(56,189,248,0.03));border:0.5px solid rgba(56,189,248,0.3);border-radius:var(--radius-lg);padding:20px;margin-bottom:4px;">
+      <div style="font-size:11px;color:var(--cyan);letter-spacing:1px;margin-bottom:12px;">GOAL SETTING</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
         <div>
           <div style="font-size:11px;color:var(--text2);margin-bottom:6px;">現在の体重</div>
@@ -1764,7 +1792,7 @@ function renderGoal(){
           <div style="font-size:11px;color:var(--text2);margin-bottom:6px;">目標体重</div>
           <div style="display:flex;align-items:baseline;gap:4px;">
             <input type="number" id="gi-tw" value="${tw}" min="30" max="200" step="0.1"
-              style="width:80px;padding:8px;font-size:20px;font-weight:700;font-family:'DM Mono',monospace;background:var(--bg3);border:0.5px solid var(--gold);border-radius:var(--radius);color:var(--gold);text-align:center;"
+              style="width:80px;padding:8px;font-size:20px;font-weight:700;font-family:'DM Mono',monospace;background:var(--bg3);border:0.5px solid var(--cyan);border-radius:var(--radius);color:var(--cyan);text-align:center;"
               oninput="updateGoalStats()">
             <span style="font-size:13px;color:var(--text2);">kg</span>
           </div>
@@ -1843,9 +1871,9 @@ function renderStats(){
           <button onclick="deleteAllTrainingSessions([${realIdxArr.join(',')}],'stats')" style="font-size:11px;padding:4px 10px;border-radius:20px;background:rgba(232,85,85,0.12);color:var(--red);border:0.5px solid rgba(232,85,85,0.3);cursor:pointer;">🗑 削除</button>
         </div>
         <div id="hist-edit-${di}" style="display:none;margin-top:8px;background:var(--bg3);border-radius:var(--radius);padding:12px;">
-          <div style="font-size:11px;color:var(--gold);margin-bottom:10px;">種目・重量・repを修正</div>
+          <div style="font-size:11px;color:var(--cyan);margin-bottom:10px;">種目・重量・repを修正</div>
           ${editRows}
-          <button onclick="applyEditPanel('hs${di}',${JSON.stringify(realIdxArr)},'hist-edit-${di}','stats')" style="width:100%;padding:9px;background:var(--gold);color:#000;border:none;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;">✓ 修正を適用</button>
+          <button onclick="applyEditPanel('hs${di}',${JSON.stringify(realIdxArr)},'hist-edit-${di}','stats')" style="width:100%;padding:9px;background:var(--cyan);color:#000;border:none;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;">✓ 修正を適用</button>
         </div>
       </div>
     </div>`;
@@ -1877,11 +1905,11 @@ function renderStats(){
         <button onclick="calNext()" style="background:none;border:none;color:var(--text2);font-size:18px;cursor:pointer;padding:0 8px;">›</button>
       </div>
       <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:6px;">
-        ${['日','月','火','水','木','金','土'].map((d,i)=>`<div style="text-align:center;font-size:11px;color:${i===0?'var(--red)':i===6?'#4a9eff':'var(--text3)'};">${d}</div>`).join('')}
+        ${['日','月','火','水','木','金','土'].map((d,i)=>`<div style="text-align:center;font-size:11px;color:${i===0?'var(--red)':i===6?'#3b82f6':'var(--text3)'};">${d}</div>`).join('')}
       </div>
       <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;"></div>
       <div id="cal-legend" style="display:flex;gap:12px;margin-top:10px;padding-top:8px;border-top:0.5px solid var(--border);">
-        <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text3);"><span style="width:6px;height:6px;border-radius:50%;background:var(--gold);display:inline-block;"></span>トレーニング</span>
+        <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text3);"><span style="width:6px;height:6px;border-radius:50%;background:var(--cyan);display:inline-block;"></span>トレーニング</span>
         <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text3);"><span style="width:5px;height:5px;border-radius:50%;background:var(--blue);opacity:0.5;display:inline-block;"></span>食事</span>
       </div>
     </div>
@@ -1893,7 +1921,7 @@ function renderStats(){
         <input type="number" id="weight-input" placeholder="78.0" step="0.1" min="30" max="200"
           style="flex:1;padding:10px;font-size:18px;font-weight:700;font-family:'DM Mono',monospace;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius);color:var(--text);text-align:center;">
         <span style="font-size:14px;color:var(--text2);">kg</span>
-        <button onclick="logWeight()" style="padding:10px 18px;background:var(--gold);color:#000;border:none;border-radius:var(--radius);font-size:14px;font-weight:700;cursor:pointer;">記録</button>
+        <button onclick="logWeight()" style="padding:10px 18px;background:var(--cyan);color:#000;border:none;border-radius:var(--radius);font-size:14px;font-weight:700;cursor:pointer;">記録</button>
       </div>
       ${weightLog.length>0?weightList:'<div style="font-size:12px;color:var(--text3);">まだ記録がありません</div>'}
     </div>
@@ -1956,17 +1984,17 @@ function renderCalendar(){
     const groups=trainMap[dateStr]||[];
     const hasMeal=mealMap.has(dateStr);
     const hasTrain=groups.length>0;
-    const dotColor=groups.length>0?(MUSCLE_COLORS[groups[0]]||'var(--gold)'):'';
+    const dotColor=groups.length>0?(MUSCLE_COLORS[groups[0]]||'var(--cyan)'):'';
 
     cells+=`<div onclick="showCalDetail('${dateStr}')" style="
       position:relative;height:36px;display:flex;flex-direction:column;
       align-items:center;justify-content:center;border-radius:5px;cursor:pointer;
-      background:${isToday?'rgba(201,168,76,0.15)':'transparent'};
-      border:${isToday?'1px solid rgba(201,168,76,0.4)':'1px solid transparent'};
+      background:${isToday?'rgba(56,189,248,0.15)':'transparent'};
+      border:${isToday?'1px solid rgba(56,189,248,0.4)':'1px solid transparent'};
       transition:background .1s;">
-      <span style="font-size:11px;font-weight:${isToday?700:400};color:${dow===0?'var(--red)':dow===6?'#4a9eff':'var(--text)'};">${d}</span>
+      <span style="font-size:11px;font-weight:${isToday?700:400};color:${dow===0?'var(--red)':dow===6?'#3b82f6':'var(--text)'};">${d}</span>
       <div style="display:flex;gap:2px;margin-top:1px;min-height:5px;">
-        ${hasTrain?`<span style="width:5px;height:5px;border-radius:50%;background:var(--gold);display:inline-block;"></span>`:''}
+        ${hasTrain?`<span style="width:5px;height:5px;border-radius:50%;background:var(--cyan);display:inline-block;"></span>`:''}
         ${hasMeal?`<span style="width:4px;height:4px;border-radius:50%;background:var(--blue);opacity:0.5;display:inline-block;"></span>`:''}
       </div>
     </div>`;
@@ -1981,8 +2009,8 @@ function showCalDetail(dateStr){
   const meals=mealHistory.filter(m=>m.date===dateStr);
   if(!sessions.length&&!meals.length){ el.innerHTML=''; return; }
 
-  let html=`<div class="card" style="border-left:3px solid var(--gold);">
-    <div style="font-size:12px;font-weight:500;color:var(--gold);margin-bottom:8px;">${dateStr}</div>`;
+  let html=`<div class="card" style="border-left:3px solid var(--cyan);">
+    <div style="font-size:12px;font-weight:500;color:var(--cyan);margin-bottom:8px;">${dateStr}</div>`;
 
   if(sessions.length){
     const mergedEx=flattenMergeSessionDay(sessions);
@@ -2056,18 +2084,18 @@ function buildBodyWeightChart(log){
   const goalSetting=lsGet('gl-goal-setting')||{};
   const datasets=[{
     label:'体重(kg)',data:sorted.map(d=>d.w),
-    borderColor:'#4a9eff',backgroundColor:'rgba(74,158,255,0.08)',
-    fill:true,tension:0.35,pointRadius:4,pointBackgroundColor:'#4a9eff',borderWidth:2
+    borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.08)',
+    fill:true,tension:0.35,pointRadius:4,pointBackgroundColor:'#3b82f6',borderWidth:2
   }];
   if(goalSetting.targetW){
     datasets.push({label:'目標',data:sorted.map(()=>goalSetting.targetW),
-      borderColor:'#c9a84c',borderDash:[4,4],borderWidth:1.5,pointRadius:0,fill:false});
+      borderColor:'#38bdf8',borderDash:[4,4],borderWidth:1.5,pointRadius:0,fill:false});
   }
   chartInstances.bw=new Chart(document.getElementById('chartBW'),{
     type:'line',data:{labels:sorted.map(d=>`${d.date.slice(5)}${d.t?' '+d.t:''}`),datasets},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-      scales:{y:{beginAtZero:false,ticks:{color:'#888',font:{size:11}},grid:{color:'rgba(255,255,255,0.05)'}},
-        x:{ticks:{color:'#888',font:{size:11}},grid:{display:false}}}}
+      scales:{y:{beginAtZero:false,ticks:{color:'#7a9ab8',font:{size:11}},grid:{color:'rgba(56,189,248,0.07)'}},
+        x:{ticks:{color:'#7a9ab8',font:{size:11}},grid:{display:false}}}}
   });
 }
 
@@ -2076,8 +2104,8 @@ function buildWeightChart(exName){
   const data=(window._allEx[exName]||[]).sort((a,b)=>a.date.localeCompare(b.date));
   chartInstances.w=new Chart(document.getElementById('chartW'),{
     type:'line',
-    data:{labels:data.map(d=>d.date.slice(5)),datasets:[{label:'最大重量(kg)',data:data.map(d=>d.maxW),borderColor:'#c9a84c',backgroundColor:'rgba(201,168,76,0.08)',fill:true,tension:0.35,pointRadius:4,pointBackgroundColor:'#c9a84c',borderWidth:2}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:false,ticks:{color:'#888',font:{size:11}},grid:{color:'rgba(255,255,255,0.05)'}},x:{ticks:{color:'#888',font:{size:11}},grid:{display:false}}}}
+    data:{labels:data.map(d=>d.date.slice(5)),datasets:[{label:'最大重量(kg)',data:data.map(d=>d.maxW),borderColor:'#38bdf8',backgroundColor:'rgba(56,189,248,0.08)',fill:true,tension:0.35,pointRadius:4,pointBackgroundColor:'#38bdf8',borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:false,ticks:{color:'#7a9ab8',font:{size:11}},grid:{color:'rgba(56,189,248,0.07)'}},x:{ticks:{color:'#7a9ab8',font:{size:11}},grid:{display:false}}}}
   });
 }
 function updateWeightChart(){
@@ -2090,11 +2118,11 @@ function buildPFCChart(){
   chartInstances.pfc=new Chart(document.getElementById('chartPFC'),{
     type:'bar',
     data:{labels:days.map(d=>d.slice(5)),datasets:[
-      {label:'タンパク質',data:days.map(d=>Math.round(mealHistory.filter(m=>m.date===d).reduce((s,m)=>s+(m.protein||0),0))),backgroundColor:'rgba(74,158,255,0.7)',stack:'p'},
-      {label:'脂質',data:days.map(d=>Math.round(mealHistory.filter(m=>m.date===d).reduce((s,m)=>s+(m.fat||0),0))),backgroundColor:'rgba(232,146,42,0.7)',stack:'p'},
-      {label:'炭水化物',data:days.map(d=>Math.round(mealHistory.filter(m=>m.date===d).reduce((s,m)=>s+(m.carbs||0),0))),backgroundColor:'rgba(76,175,125,0.7)',stack:'p'}
+      {label:'タンパク質',data:days.map(d=>Math.round(mealHistory.filter(m=>m.date===d).reduce((s,m)=>s+(m.protein||0),0))),backgroundColor:'rgba(59,130,246,0.7)',stack:'p'},
+      {label:'脂質',data:days.map(d=>Math.round(mealHistory.filter(m=>m.date===d).reduce((s,m)=>s+(m.fat||0),0))),backgroundColor:'rgba(245,158,11,0.7)',stack:'p'},
+      {label:'炭水化物',data:days.map(d=>Math.round(mealHistory.filter(m=>m.date===d).reduce((s,m)=>s+(m.carbs||0),0))),backgroundColor:'rgba(16,185,129,0.7)',stack:'p'}
     ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{stacked:true,ticks:{color:'#888',font:{size:11}},grid:{color:'rgba(255,255,255,0.05)'}},x:{stacked:true,ticks:{color:'#888',font:{size:11},autoSkip:false},grid:{display:false}}}}
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{stacked:true,ticks:{color:'#7a9ab8',font:{size:11}},grid:{color:'rgba(56,189,248,0.07)'}},x:{stacked:true,ticks:{color:'#7a9ab8',font:{size:11},autoSkip:false},grid:{display:false}}}}
   });
 }
 
