@@ -302,6 +302,45 @@ input:focus {
   <!-- Training -->
   <div class="section active" id="sec-training">
 
+    <!-- インターバルタイマー -->
+    <div class="card" style="margin-bottom:16px;" id="timer-card">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <!-- 円形プログレス -->
+        <div style="position:relative;flex-shrink:0;width:76px;height:76px;">
+          <svg width="76" height="76" viewBox="0 0 76 76" style="display:block;">
+            <circle cx="38" cy="38" r="32" fill="none" stroke="var(--bg3)" stroke-width="3.5"/>
+            <circle id="timer-ring" cx="38" cy="38" r="32" fill="none" stroke="var(--cyan)" stroke-width="3.5"
+              stroke-dasharray="201.1" stroke-dashoffset="0" stroke-linecap="round"
+              transform="rotate(-90 38 38)" style="transition:stroke-dashoffset .9s linear,stroke .3s;"/>
+          </svg>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+            <div id="timer-display" style="font-family:'DM Mono',monospace;font-size:15px;font-weight:700;color:var(--text);transition:color .3s;">01:30</div>
+          </div>
+        </div>
+        <!-- コントロール -->
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;gap:5px;margin-bottom:8px;">
+            <button class="timer-preset" onclick="setTimerDuration(60)"  style="flex:1;padding:5px 2px;font-size:11px;font-family:'DM Mono',monospace;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;">60s</button>
+            <button class="timer-preset" onclick="setTimerDuration(90)"  style="flex:1;padding:5px 2px;font-size:11px;font-family:'DM Mono',monospace;border-radius:var(--radius);border:0.5px solid var(--cyan);background:rgba(56,189,248,0.1);color:var(--cyan);cursor:pointer;">90s</button>
+            <button class="timer-preset" onclick="setTimerDuration(120)" style="flex:1;padding:5px 2px;font-size:11px;font-family:'DM Mono',monospace;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;">2min</button>
+            <button class="timer-preset" onclick="setTimerDuration(180)" style="flex:1;padding:5px 2px;font-size:11px;font-family:'DM Mono',monospace;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;">3min</button>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <div style="position:relative;flex:1;">
+              <input type="number" id="timer-custom" placeholder="秒" min="5" max="3600"
+                style="width:100%;padding:8px 22px 8px 8px;font-size:13px;font-family:'DM Mono',monospace;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius);color:var(--text);"
+                onchange="if(this.value&&+this.value>=5) setTimerDuration(+this.value)">
+              <span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text3);">s</span>
+            </div>
+            <button id="timer-start-btn" onclick="toggleTimer()"
+              style="flex:1.4;padding:8px 4px;border-radius:var(--radius);border:none;background:var(--cyan);color:#000;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Mono',monospace;letter-spacing:0.05em;white-space:nowrap;">▶ START</button>
+            <button onclick="resetTimer()"
+              style="padding:8px 11px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:15px;cursor:pointer;line-height:1;">↺</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- モード切替 -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
       <button id="mode-btn-manual" onclick="setTrainingMode('manual')"
@@ -850,6 +889,63 @@ function resetAfterAnalysis(type){
 }
 
 // ── Tab ──
+// ── インターバルタイマー ──
+let _timerTotal=90,_timerRemaining=90,_timerRunning=false,_timerTick=null;
+const _TIMER_CIRC=201.1; // 2π×32
+function setTimerDuration(secs){
+  resetTimer(); _timerTotal=secs; _timerRemaining=secs;
+  document.querySelectorAll('.timer-preset').forEach(b=>{
+    const match=(b.textContent==='60s'&&secs===60)||(b.textContent==='90s'&&secs===90)||
+                (b.textContent==='2min'&&secs===120)||(b.textContent==='3min'&&secs===180);
+    b.style.border=match?'0.5px solid var(--cyan)':'0.5px solid var(--border2)';
+    b.style.background=match?'rgba(56,189,248,0.1)':'var(--bg3)';
+    b.style.color=match?'var(--cyan)':'var(--text2)';
+  });
+  const ci=document.getElementById('timer-custom'); if(ci&&![60,90,120,180].includes(secs)) ci.value=secs; else if(ci) ci.value='';
+  updateTimerUI();
+}
+function toggleTimer(){ _timerRunning?pauseTimer():startTimer(); }
+function startTimer(){
+  if(_timerRemaining<=0) _timerRemaining=_timerTotal;
+  _timerRunning=true;
+  _timerTick=setInterval(()=>{
+    _timerRemaining=Math.max(0,_timerRemaining-1);
+    updateTimerUI();
+    if(_timerRemaining<=0){ clearInterval(_timerTick); _timerRunning=false; onTimerDone(); }
+  },1000);
+  updateTimerUI();
+}
+function pauseTimer(){ clearInterval(_timerTick); _timerRunning=false; updateTimerUI(); }
+function resetTimer(){ clearInterval(_timerTick); _timerRunning=false; _timerRemaining=_timerTotal; updateTimerUI(); }
+function updateTimerUI(){
+  const m=Math.floor(_timerRemaining/60),s=_timerRemaining%60;
+  const disp=document.getElementById('timer-display');
+  const ring=document.getElementById('timer-ring');
+  const btn=document.getElementById('timer-start-btn');
+  if(disp) disp.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  const pct=_timerTotal>0?_timerRemaining/_timerTotal:1;
+  const warn=_timerRemaining<=10&&_timerRunning;
+  if(ring){ ring.style.strokeDashoffset=_TIMER_CIRC*(1-pct); ring.style.stroke=warn?'var(--amber)':_timerRunning?'var(--cyan)':'var(--text3)'; }
+  if(disp) disp.style.color=warn?'var(--amber)':_timerRunning?'var(--cyan)':'var(--text)';
+  if(btn){ btn.textContent=_timerRunning?'⏸ PAUSE':(_timerRemaining>0&&_timerRemaining<_timerTotal?'▶ RESUME':'▶ START'); btn.style.background=_timerRunning?'var(--text3)':'var(--cyan)'; }
+}
+function onTimerDone(){
+  if(navigator.vibrate) navigator.vibrate([400,100,400,100,400]);
+  try{
+    const ctx=new AudioContext();
+    [[880,0],[1100,.35],[880,.65]].forEach(([freq,t])=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value=freq;
+      g.gain.setValueAtTime(0.25,ctx.currentTime+t);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+0.3);
+      o.start(ctx.currentTime+t); o.stop(ctx.currentTime+t+0.35);
+    });
+  }catch(e){}
+  const card=document.getElementById('timer-card');
+  if(card){ let n=0; const fl=setInterval(()=>{ card.style.boxShadow=n%2?'':'0 0 0 2px var(--cyan)'; if(++n>5){clearInterval(fl);card.style.boxShadow='';} },200); }
+}
+
 const TAB_ORDER=['training','meal','goal','stats','insta'];
 let currentTabName='training';
 
