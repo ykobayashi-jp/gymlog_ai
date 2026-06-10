@@ -36,12 +36,26 @@ body {
   line-height: 1.6;
 }
 /* ── Layout ── */
-.app { max-width: 480px; margin: 0 auto; padding: 0 0 80px; }
+.app {
+  max-width: 480px; margin: 0 auto;
+  height: 100dvh;
+  display: flex; flex-direction: column;
+}
 header {
+  flex-shrink: 0;
   padding: 24px 20px 0;
   border-bottom: 0.5px solid var(--border);
-  margin-bottom: 0;
-  background: linear-gradient(180deg, rgba(56,189,248,0.05) 0%, transparent 100%);
+  background: rgba(7,9,12,0.88);
+  background-image: linear-gradient(180deg, rgba(56,189,248,0.05) 0%, transparent 100%);
+  position: sticky; top: 0; z-index: 10;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+.sections-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 32px;
 }
 .header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
 .logo {
@@ -212,8 +226,9 @@ header {
 .api-drawer { overflow:hidden; max-height:0; transition:max-height .3s ease; }
 .api-drawer.open { max-height:80px; }
 .api-toggle { display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;padding:0; }
-.api-dot { width:8px;height:8px;border-radius:50%;background:var(--text3);flex-shrink:0; }
-.api-dot.ok { background:var(--green); }
+.api-dot { width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background .3s; }
+.api-dot.ok { background:var(--green);box-shadow:0 0 6px rgba(16,185,129,0.5);animation:dotPulse 2.5s ease-in-out infinite; }
+@keyframes dotPulse { 0%,100%{opacity:1} 50%{opacity:0.55} }
 
 /* ── Card hover ── */
 .card { transition: border-color .2s, box-shadow .2s; }
@@ -250,17 +265,20 @@ input:focus {
       <div class="logo">FORMA<span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:400;letter-spacing:0;margin-left:8px;opacity:0.6;">beta</span></div>
       <button class="api-toggle" onclick="toggleApiDrawer()" id="api-toggle-btn">
         <div class="api-dot" id="api-dot"></div>
-        <span style="font-size:12px;color:var(--text2);">API Key</span>
-        <span id="api-chevron" style="font-size:12px;color:var(--text3);">▾</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;color:var(--text2);">API KEY</span>
+        <span id="api-chevron" style="font-size:10px;color:var(--text3);display:inline-block;transition:transform .3s;">▾</span>
       </button>
     </div>
     <div class="api-drawer" id="api-drawer">
-      <div style="padding:8px 0 12px;display:flex;align-items:center;gap:8px;">
-        <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off"
-          style="flex:1;padding:8px 10px;font-size:13px;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius);color:var(--text);font-family:'DM Mono',monospace;">
-        <button onclick="saveKey()" style="padding:8px 14px;background:var(--cyan);color:#000;border:none;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;">保存</button>
+      <div style="padding:10px 0 14px;display:flex;flex-direction:column;gap:8px;">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:0.05em;">// Anthropic API Key</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." autocomplete="off"
+            style="flex:1;padding:9px 12px;font-size:12px;font-family:'DM Mono',monospace;background:rgba(56,189,248,0.04);border:0.5px solid rgba(56,189,248,0.2);border-radius:var(--radius);color:var(--cyan);letter-spacing:0.03em;">
+          <button onclick="saveKey()" style="padding:9px 14px;background:rgba(56,189,248,0.12);color:var(--cyan);border:0.5px solid rgba(56,189,248,0.3);border-radius:var(--radius);font-size:11px;font-weight:700;font-family:'DM Mono',monospace;letter-spacing:0.08em;cursor:pointer;white-space:nowrap;transition:all .15s;" onmouseover="this.style.background='rgba(56,189,248,0.2)'" onmouseout="this.style.background='rgba(56,189,248,0.12)'">SAVE</button>
+        </div>
+        <div class="key-status" id="keyStatus" style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);padding-bottom:2px;"></div>
       </div>
-      <div class="key-status" id="keyStatus" style="margin-top:-8px;padding-bottom:8px;font-size:11px;"></div>
     </div>
     <div class="tabs">
       <button class="tab active" onclick="switchTab('training')" id="tab-training">💪<span class="tab-label">トレーニング</span></button>
@@ -271,6 +289,7 @@ input:focus {
     </div>
   </header>
 
+  <div class="sections-wrapper">
   <!-- Training -->
   <div class="section active" id="sec-training">
 
@@ -290,7 +309,10 @@ input:focus {
     <div id="training-manual">
       <!-- 日付 + 自動提案トグル -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-        <span id="training-date-display" style="font-size:13px;font-weight:500;color:var(--text);font-family:'DM Mono',monospace;cursor:pointer;" onclick="editTrainingDate()"></span>
+        <div onclick="editTrainingDate()" style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;padding:5px 10px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg3);transition:border-color .15s;" onmouseover="this.style.borderColor='rgba(56,189,248,0.35)'" onmouseout="this.style.borderColor='rgba(56,189,248,0.18)'">
+          <span id="training-date-display" style="font-size:13px;font-weight:500;color:var(--text);font-family:'DM Mono',monospace;"></span>
+          <span style="font-size:11px;color:var(--text3);">✎</span>
+        </div>
         <div style="display:flex;align-items:center;gap:6px;">
           <span style="font-size:11px;color:var(--text3);">前回提案</span>
           <div onclick="toggleSuggestion()" id="suggest-toggle"
@@ -468,6 +490,7 @@ input:focus {
   <div class="section" id="sec-stats">
     <div id="stats-content"><div class="loading"><span class="spin"></span>データを読み込み中...</div></div>
   </div>
+  </div><!-- /sections-wrapper -->
 </div>
 
 <div class="toast" id="toast"></div>
@@ -477,6 +500,7 @@ input:focus {
 // ── State ──
 const imgData = { training:{b64:null,mime:null}, meal:{b64:null,mime:null} };
 let trainingHistory=[], mealHistory=[], goals={p:150,f:60,c:200};
+let customExercises=[];
 let chartInstances={};
 let calcSex='m', calcGoalMode='maintain', calcActivity='2';
 
@@ -492,6 +516,7 @@ function loadAll(){
   trainingHistory = lsGet('gl-training') || [];
   mealHistory     = lsGet('gl-meals')    || [];
   goals           = lsGet('gl-goals')    || {p:150,f:60,c:200};
+  customExercises = lsGet('gl-custom-exercises') || [];
   const key       = localStorage.getItem('gl-apikey') || '';
   if(key){ document.getElementById('apiKeyInput').value=key; updateKeyStatus(key); }
   const profile   = lsGet('gl-profile') || {h:170,w:70,a:25,sex:'m',mode:'maintain'};
@@ -1055,12 +1080,12 @@ const MUSCLE_GROUPS = {
     'バーベル': ['バーベルベンチプレス','インクラインバーベルベンチ','デクラインバーベルベンチ'],
     'マシン': ['スミスマシンベンチプレス','チェストプレスマシン','ペックデック','バタフライマシン','ケーブルクロスオーバー','ケーブルフライ'],
     'ダンベル': ['ダンベルベンチプレス','インクラインダンベルベンチ','ダンベルフライ','インクラインダンベルフライ','ダンベルプルオーバー'],
-    '自重': ['ディップス','プッシュアップ','ワイドプッシュアップ'],
+    '自重': ['ディップス','プッシュアップ','ワイドプッシュアップ','デクラインプッシュアップ','ダイヤモンドプッシュアップ'],
   },
   '背中': {
-    'バーベル': ['デッドリフト','バーベルロウ','Tバーロウ','スーモデッドリフト'],
-    'マシン': ['ラットプルダウン','シーテッドケーブルロウ','ケーブルロウ','マシンロウ','ロープフェイスプル','アシステッド懸垂'],
-    'ダンベル': ['ダンベルロウ','ダンベルデッドリフト','ダンベルプルオーバー'],
+    'バーベル': ['デッドリフト','バーベルロウ','Tバーロウ','スーモデッドリフト','バーベルシュラッグ'],
+    'マシン': ['ラットプルダウン','ナローグリップラットプルダウン','リバースグリップラットプルダウン','シーテッドケーブルロウ','ケーブルロウ','マシンロウ','ロープフェイスプル','アシステッド懸垂'],
+    'ダンベル': ['ダンベルロウ','ダンベルデッドリフト','ダンベルプルオーバー','ダンベルシュラッグ'],
     '自重': ['懸垂（ワイドグリップ）','懸垂（ナローグリップ）','チンアップ'],
   },
   '肩': {
@@ -1072,24 +1097,24 @@ const MUSCLE_GROUPS = {
   '腕': {
     'バーベル': ['バーベルカール','EZバーカール','EZバースカルクラッシャー','クローズグリップベンチ'],
     'マシン': ['ケーブルカール','ケーブルハンマーカール','プリーチャーカールマシン','トライセプスプレスダウン（ロープ）','トライセプスプレスダウン（バー）','ケーブルオーバーヘッドトライセプス'],
-    'ダンベル': ['ダンベルカール','ハンマーカール','インクラインカール','コンセントレーションカール','ダンベルトライセプスキックバック','ダンベルオーバーヘッドトライセプス'],
-    '自重': ['ディップス（トライセプス）','チンアップ（バイセプス）'],
+    'ダンベル': ['ダンベルカール','ハンマーカール','インクラインカール','コンセントレーションカール','スパイダーカール','ダンベルトライセプスキックバック','ダンベルオーバーヘッドトライセプス'],
+    '自重': ['ディップス（トライセプス）','ベンチディップス','チンアップ（バイセプス）'],
   },
   '脚': {
-    'バーベル': ['バーベルスクワット','フロントスクワット','バーベルランジ','バーベルRDL','バーベルヒップスラスト'],
-    'マシン': ['レッグプレス','レッグカール（ライイング）','レッグカール（シーテッド）','レッグエクステンション','ハックスクワット','カーフレイズマシン','スミスマシンスクワット','アダクション','アブダクション'],
-    'ダンベル': ['ダンベルスクワット','ダンベルランジ','ダンベルRDL','ダンベルカーフレイズ','ダンベルヒップスラスト'],
-    '自重': ['ブルガリアンスクワット','シングルレッグスクワット','グルートブリッジ','ヒップスラスト（自重）','ボックスジャンプ'],
+    'バーベル': ['バーベルスクワット','フロントスクワット','バーベルランジ','バーベルRDL','バーベルヒップスラスト','バーベルカーフレイズ'],
+    'マシン': ['レッグプレス','レッグカール（ライイング）','レッグカール（シーテッド）','レッグエクステンション','ハックスクワット','カーフレイズマシン','スタンディングカーフレイズ','グルートキックバック','スミスマシンスクワット','アダクション','アブダクション'],
+    'ダンベル': ['ダンベルスクワット','ダンベルランジ','ウォーキングランジ','ダンベルRDL','ダンベルカーフレイズ','ダンベルヒップスラスト','ダンベルスプリットスクワット'],
+    '自重': ['ブルガリアンスクワット','ウォーキングランジ','シングルレッグスクワット','グルートブリッジ','ヒップスラスト（自重）','カーフレイズ（自重）','ボックスジャンプ'],
   },
   '腹': {
     'マシン': ['アブドミナルクランチマシン','ケーブルクランチ','ケーブルウッドチョップ'],
     'ダンベル': ['ダンベルサイドベンド','ダンベルクランチ'],
-    '自重': ['クランチ','シットアップ','レッグレイズ','ハンギングレッグレイズ','プランク','サイドプランク','ロシアンツイスト','アブローラー','バイシクルクランチ','ドラゴンフラッグ'],
+    '自重': ['クランチ','シットアップ','レッグレイズ','ハンギングレッグレイズ','V字腹筋','ニートゥチェスト','プランク','サイドプランク','ロシアンツイスト','アブローラー','バイシクルクランチ','ドラゴンフラッグ'],
   },
   '有酸素': {
     'マシン': ['トレッドミル','エアロバイク','クロストレーナー','ローイングマシン','ステッパー','スキーエルゴ'],
-    '屋外': ['ランニング','ウォーキング','サイクリング','水泳','縄跳び'],
-    'HIIT': ['バーピー','マウンテンクライマー','ジャンピングジャック','スプリントインターバル'],
+    '屋外': ['ランニング','ウォーキング','サイクリング','水泳','縄跳び','ハイキング'],
+    'HIIT': ['バーピー','マウンテンクライマー','ジャンピングジャック','ハイニー','ジャンプスクワット','スケーター','スプリントインターバル'],
   },
 };
 const MUSCLE_COLORS = {'胸':'#fb7185','背中':'#60a5fa','肩':'#c084fc','腕':'#fbbf24','脚':'#34d399','腹':'#38bdf8','有酸素':'#2dd4bf'};
@@ -1302,7 +1327,15 @@ function renderSubGroup(sub,exs){
   const btns=exs.map(ex=>{
     const sel=selectedExercises.find(e=>e.name===ex);
     const safe=ex.replace(/'/g,"\\'");
-    return '<button onclick="toggleExercise(\''+safe+'\',\''+subName+'\')" style="padding:6px 11px;border-radius:20px;border:'+(sel?'2px solid var(--cyan)':'1px solid var(--border2)')+';background:'+(sel?'rgba(56,189,248,0.12)':'var(--bg2)')+';color:'+(sel?'var(--cyan)':'var(--text2)')+';font-size:12px;font-weight:'+(sel?700:400)+';cursor:pointer;margin-bottom:4px;">'+ex+(sel?' ✓':'')+'</button>';
+    const isCustom=customExercises.some(e=>e.name===ex);
+    const star=isCustom?'<span style="font-size:8px;color:var(--cyan);margin-left:3px;vertical-align:middle;">★</span>':'';
+    const delBtn=isCustom
+      ?'<button onclick="event.stopPropagation();deleteCustomExercise(\''+safe+'\')" title="削除" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:rgba(248,113,113,0.15);color:var(--red);border:none;cursor:pointer;font-size:9px;line-height:1;margin-left:1px;flex-shrink:0;">✕</button>'
+      :'';
+    const pill='<button onclick="toggleExercise(\''+safe+'\',\''+subName+'\')" style="padding:6px 10px;border-radius:20px;border:'+(sel?'2px solid var(--cyan)':'1px solid var(--border2)')+';background:'+(sel?'rgba(56,189,248,0.12)':'var(--bg2)')+';color:'+(sel?'var(--cyan)':'var(--text2)')+';font-size:12px;font-weight:'+(sel?700:400)+';cursor:pointer;">'+ex+(sel?' ✓':'')+star+'</button>';
+    return isCustom
+      ?'<span style="display:inline-flex;align-items:center;gap:2px;margin-bottom:4px;">'+pill+delBtn+'</span>'
+      :'<span style="display:inline-block;margin-bottom:4px;">'+pill+'</span>';
   }).join('');
   return '<div style="margin-bottom:12px;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;"><span style="font-size:10px;padding:2px 7px;border-radius:20px;background:'+partColor+'22;color:'+partColor+';border:0.5px solid '+partColor+';">'+partName+'</span><span style="font-size:11px;font-weight:700;color:'+subColor+';">'+subName+'</span></div><div style="display:flex;flex-wrap:wrap;gap:5px;">'+btns+'</div></div>';
 }
@@ -1311,7 +1344,22 @@ function renderExerciseListBtns(){
   if(!el) return;
   if(currentSplitMode==='muscle'){
     const g=MUSCLE_GROUPS[currentMuscleGroup]||{};
-    el.innerHTML=Object.entries(g).map(([sub,exs])=>renderSubGroup(currentMuscleGroup+' / '+sub,exs)).join('');
+    // カスタム種目を正しいsubに混ぜる
+    const mergedSubs={};
+    Object.entries(g).forEach(([sub,exs])=>{
+      const customs=customExercises.filter(e=>e.part===currentMuscleGroup&&e.sub===sub).map(e=>e.name);
+      mergedSubs[sub]=[...exs,...customs];
+    });
+    // 既存subにないカスタム種目（カスタム/新sub）は別セクションで追加
+    const extraSubs={};
+    customExercises.filter(e=>e.part===currentMuscleGroup&&!g[e.sub]).forEach(e=>{
+      if(!extraSubs[e.sub])extraSubs[e.sub]=[];
+      if(!extraSubs[e.sub].includes(e.name))extraSubs[e.sub].push(e.name);
+    });
+    el.innerHTML=[
+      ...Object.entries(mergedSubs).map(([sub,exs])=>renderSubGroup(currentMuscleGroup+' / '+sub,exs)),
+      ...Object.entries(extraSubs).map(([sub,exs])=>renderSubGroup(currentMuscleGroup+' / '+sub,exs))
+    ].join('');
   } else {
     const merged=getMergedExercises(currentSplitGroup);
     el.innerHTML=Object.entries(merged).map(([sub,exs])=>renderSubGroup(sub,exs)).join('');
@@ -1320,15 +1368,82 @@ function renderExerciseListBtns(){
 function toggleExercise(name, sub){
   const idx=selectedExercises.findIndex(e=>e.name===name);
   if(idx>=0) selectedExercises.splice(idx,1);
-  else selectedExercises.push({name, sub:sub||'', sets:[{weight:'',reps:''}]});
+  else {
+    const isCardio = currentMuscleGroup==='有酸素';
+    const isTreadmill = name==='トレッドミル';
+    const initSet = isTreadmill ? {weight:'',reps:'',extra:''} : {weight:'',reps:''};
+    selectedExercises.push({name, sub:sub||'', isCardio, isTreadmill, sets:[initSet]});
+  }
   renderExerciseListBtns();
   renderSetsArea();
 }
-function addCustomExercise(){
+async function addCustomExercise(){
   const inp=document.getElementById('custom-exercise-input');
   const name=inp.value.trim(); if(!name) return;
-  if(!selectedExercises.find(e=>e.name===name)) selectedExercises.push({name,sets:[{weight:'',reps:''}]});
-  inp.value=''; renderSetsArea(); renderExerciseListBtns();
+  inp.value='';
+
+  // セッションにすぐ追加
+  if(!selectedExercises.find(e=>e.name===name)){
+    const isCardio=currentMuscleGroup==='有酸素';
+    const isTreadmill=name==='トレッドミル';
+    const initSet=isTreadmill?{weight:'',reps:'',extra:''}:{weight:'',reps:''};
+    selectedExercises.push({name,sub:'',isCardio,isTreadmill,sets:[initSet]});
+    renderSetsArea();
+  }
+
+  // すでに分類済みならそのまま表示更新
+  if(customExercises.find(e=>e.name===name)){
+    renderExerciseListBtns(); return;
+  }
+
+  // API分類を試みる
+  const key=getKey();
+  if(key){
+    showToast('🤖 種目を自動分類中...');
+    try{
+      const result=await classifyExerciseWithAPI(name,key);
+      customExercises.push(result);
+      lsSet('gl-custom-exercises',customExercises);
+      showToast(`「${name}」→ ${result.part} / ${result.sub}`);
+    }catch(e){
+      customExercises.push({name,part:currentMuscleGroup,sub:'カスタム'});
+      lsSet('gl-custom-exercises',customExercises);
+      showToast(`「${name}」を追加しました`);
+    }
+  } else {
+    // APIキーなし → 現在の部位に保存
+    customExercises.push({name,part:currentMuscleGroup,sub:'カスタム'});
+    lsSet('gl-custom-exercises',customExercises);
+    showToast(`「${name}」を追加しました（APIキー設定で自動分類）`);
+  }
+  renderExerciseListBtns();
+}
+
+async function classifyExerciseWithAPI(name,key){
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+    body:JSON.stringify({
+      model:'claude-haiku-4-5-20251001',
+      max_tokens:60,
+      system:'筋トレ種目を分類。部位は[胸,背中,肩,腕,脚,腹,有酸素]から、器具は[バーベル,ダンベル,マシン,自重,屋外,HIIT]から選びJSONのみ返せ。例:{"part":"脚","sub":"マシン"}',
+      messages:[{role:'user',content:name}]
+    })
+  });
+  const data=await res.json();
+  const text=data.content[0].text.replace(/```[\w]*\n?/g,'').trim();
+  const parsed=JSON.parse(text);
+  return {name, part:parsed.part, sub:parsed.sub, isCardio:parsed.part==='有酸素', isTreadmill:name==='トレッドミル'};
+}
+
+function deleteCustomExercise(name){
+  if(!confirm(`「${name}」をカスタム種目から削除しますか？`))return;
+  customExercises=customExercises.filter(e=>e.name!==name);
+  lsSet('gl-custom-exercises',customExercises);
+  const idx=selectedExercises.findIndex(e=>e.name===name);
+  if(idx>=0){selectedExercises.splice(idx,1);renderSetsArea();}
+  renderExerciseListBtns();
+  showToast(`「${name}」を削除しました`);
 }
 function getPastMax(name){
   let max=0;
@@ -1345,26 +1460,50 @@ function renderSetsArea(){
   if(sb) sb.style.display='block';
   el.innerHTML=selectedExercises.map((ex,ei)=>{
     const pm=getPastMax(ex.name);
-    const pmHTML=pm?`<span style="font-size:11px;color:var(--text3);margin-left:6px;">過去最高 <span style="color:var(--cyan);font-weight:700;">${pm}kg</span></span>`:'';
     const color=MUSCLE_COLORS[currentMuscleGroup]||'var(--cyan)';
-    const sHTML=ex.sets.map((s,si)=>`
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-        <div style="font-size:11px;color:var(--text3);width:36px;text-align:center;font-family:'DM Mono',monospace;flex-shrink:0;">Set${si+1}</div>
+
+    // ── カーディオ判定 ──
+    const isCardio=ex.isCardio||false;
+    const isHIIT=ex.sub==='HIIT';
+    const isOutdoor=ex.sub==='屋外';
+    const f1Label = isCardio ? (isHIIT ? 'セット' : '分') : 'kg';
+    const f2Label = isCardio ? (isHIIT ? '秒' : isOutdoor ? 'km' : 'km/h') : 'rep';
+    const f1Mode = isCardio ? 'decimal' : 'decimal';
+    const f2Mode = isCardio ? (isHIIT ? 'numeric' : 'decimal') : 'numeric';
+    const addBtnLabel = isCardio ? (isHIIT ? '+ インターバルを追加' : '+ ラップを追加') : '+ セットを追加';
+    const rowLabel = isCardio ? (isHIIT ? 'Round' : 'Lap') : 'Set';
+    const pmHTML = pm && !isCardio ? `<span style="font-size:11px;color:var(--text3);margin-left:6px;">過去最高 <span style="color:var(--cyan);font-weight:700;">${pm}kg</span></span>` : '';
+
+    const sHTML=ex.sets.map((s,si)=>{
+      const tiltRow=ex.isTreadmill?`
+        <div style="display:flex;align-items:center;gap:8px;margin-top:-2px;margin-bottom:10px;padding-left:50px;">
+          <span style="font-size:11px;color:var(--text3);white-space:nowrap;">傾斜</span>
+          <div style="width:96px;position:relative;">
+            <input type="number" inputmode="decimal" placeholder="0" min="0" max="30" step="0.5" value="${s.extra||''}"
+              style="width:100%;padding:7px 22px 7px 10px;font-size:14px;font-weight:600;font-family:'DM Mono',monospace;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius);color:var(--text);text-align:center;"
+              oninput="if(this.value<0)this.value=0;updateSet(${ei},${si},'extra',this.value)">
+            <span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text3);">%</span>
+          </div>
+        </div>`:'';
+      return `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:${ex.isTreadmill?'4px':'8px'};">
+        <div style="font-size:11px;color:var(--text3);width:42px;text-align:center;font-family:'DM Mono',monospace;flex-shrink:0;">${rowLabel}${si+1}</div>
         <div style="flex:1;position:relative;">
-          <input type="number" inputmode="decimal" placeholder="0" min="0" value="${s.weight}"
-            style="width:100%;padding:12px 28px 12px 10px;font-size:18px;font-weight:700;font-family:'DM Mono',monospace;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius);color:var(--text);text-align:center;"
+          <input type="number" inputmode="${f1Mode}" placeholder="0" min="0" value="${s.weight}"
+            style="width:100%;padding:12px 36px 12px 10px;font-size:18px;font-weight:700;font-family:'DM Mono',monospace;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius);color:var(--text);text-align:center;"
             oninput="if(this.value<0)this.value=0;updateSet(${ei},${si},'weight',this.value)">
-          <span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3);">kg</span>
+          <span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3);">${f1Label}</span>
         </div>
         <div style="font-size:18px;color:var(--text3);flex-shrink:0;">×</div>
         <div style="flex:1;position:relative;">
-          <input type="number" inputmode="numeric" placeholder="0" min="0" value="${s.reps}"
-            style="width:100%;padding:12px 30px 12px 10px;font-size:18px;font-weight:700;font-family:'DM Mono',monospace;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius);color:var(--text);text-align:center;"
+          <input type="number" inputmode="${f2Mode}" placeholder="0" min="0" value="${s.reps}"
+            style="width:100%;padding:12px 36px 12px 10px;font-size:18px;font-weight:700;font-family:'DM Mono',monospace;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius);color:var(--text);text-align:center;"
             oninput="if(this.value<0)this.value=0;updateSet(${ei},${si},'reps',this.value)">
-          <span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3);">rep</span>
+          <span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3);">${f2Label}</span>
         </div>
         <button onclick="removeSet(${ei},${si})" style="width:32px;height:32px;border-radius:50%;background:rgba(232,85,85,0.15);color:var(--red);border:none;cursor:pointer;font-size:16px;flex-shrink:0;">×</button>
-      </div>`).join('');
+      </div>${tiltRow}`;
+    }).join('');
     const subBadge=ex.sub?`<span style="font-size:10px;padding:2px 7px;border-radius:20px;background:${(SUB_COLORS[ex.sub]||'#888')}22;color:${SUB_COLORS[ex.sub]||'#888'};border:0.5px solid ${SUB_COLORS[ex.sub]||'#888'};margin-left:6px;">${ex.sub}</span>`:'';
     const suggHTML=getSuggestionHTML(ex.name, ei);
     return `<div class="card" style="margin-bottom:12px;border-left:3px solid ${color};">
@@ -1374,7 +1513,7 @@ function renderSetsArea(){
       </div>
       ${suggHTML}
       ${sHTML}
-      <button onclick="addSet(${ei})" style="width:100%;padding:9px;border-radius:var(--radius);border:1px dashed var(--border2);background:transparent;color:var(--text2);font-size:13px;cursor:pointer;margin-top:4px;">+ セットを追加</button>
+      <button onclick="addSet(${ei})" style="width:100%;padding:9px;border-radius:var(--radius);border:1px dashed var(--border2);background:transparent;color:var(--text2);font-size:13px;cursor:pointer;margin-top:4px;">${addBtnLabel}</button>
     </div>`;
   }).join('');
 }
@@ -1388,7 +1527,11 @@ function updateSet(ei,si,field,val){
     // 直接DOMは触らずstateだけ更新でOK
   }
 }
-function addSet(ei){ selectedExercises[ei].sets.push({weight:'',reps:''}); renderSetsArea(); }
+function addSet(ei){
+  const ex=selectedExercises[ei];
+  ex.sets.push(ex.isTreadmill ? {weight:'',reps:'',extra:''} : {weight:'',reps:''});
+  renderSetsArea();
+}
 function removeSet(ei,si){
   if(selectedExercises[ei].sets.length<=1){showToast('最低1セット必要です');return;}
   selectedExercises[ei].sets.splice(si,1); renderSetsArea();
